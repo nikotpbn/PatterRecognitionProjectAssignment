@@ -1,28 +1,11 @@
 from dataset import Dataset
 import math
 
+debug = False
+
 # Frequency in Hz corresponding to 1s and 10s windows
 one_second = 20
 ten_seconds = 200
-
-# Structure to hold the 200 time series values [x, y, z]
-ten_seconds_sample = []
-one_second_sample = []
-
-# Import raw dataset
-dataset = Dataset().dataset
-
-# Structure to hold high-level features
-feature_dataset = {
-    "phone": {
-        "accel": {},
-        "gyro": {}
-    },
-    "watch": {
-        "accel": {},
-        "gyro": {}
-    }
-}
 
 
 # Method to gather high-level features
@@ -92,15 +75,14 @@ def get_features(data, code):
     avg_y = total_y / ten_seconds
     avg_z = total_z / ten_seconds
 
-    # TODO: Another iteration to calculate the variance
     # Calculate variance
     variance_x = 0
     variance_y = 0
     variance_z = 0
     for item in data:
         variance_x += math.pow((item[0] - avg_x), 2)
-        variance_y += math.pow((item[1] - avg_x), 2)
-        variance_z += math.pow((item[2] - avg_x), 2)
+        variance_y += math.pow((item[1] - avg_y), 2)
+        variance_z += math.pow((item[2] - avg_z), 2)
 
     variance_x /= ten_seconds
     variance_y /= ten_seconds
@@ -125,48 +107,80 @@ def get_features(data, code):
     return high_level_data
 
 
-# Access raw data structure
-for subject in dataset["phone"]["accel"]:
-    # Variable to control the number of samples gathered
-    sample_count = 0
-    window = 0
+class HLDataset:
+    def add_data(self, device, sensor, data):
+        # Structure to hold the 200 time series values [x, y, z]
+        ten_seconds_sample = []
+        # one_second_sample = []
 
-    # Iterate through the raw_dataset
-    for ts in dataset["phone"]["accel"][subject]:
-
-        if sample_count is 1:
-            # Get the item label
-            label = dataset["phone"]["accel"][subject][ts]["activity_code"]
-
-        # Variable to hold sample x, y and z values
-        x = dataset["phone"]["accel"][subject][ts]["x_axis"]
-        y = dataset["phone"]["accel"][subject][ts]["y_axis"]
-        z = dataset["phone"]["accel"][subject][ts]["z_axis"]
-        sample_count += 1
-
-        # Add values to sample set
-        ten_seconds_sample.append([x, y, z])
-
-        # Just to debug data
-        # if sample_count % 2 is 0:
-        #     print(sample_set)
-
-        # Extract features and reset the variables after 10s (200 instances)
-        if sample_count is ten_seconds:
-            hld = get_features(ten_seconds_sample, label)
-
-            print("Window: ", window)
-            print("Binned X: ", hld["x"])
-            print("Binned Y: ", hld["y"])
-            print("Binned Z: ", hld["z"])
-            print("Average {X, Y, Z}: ", hld["avg"])
-            print("Variance {X, Y, Z}: ", hld["variance"])
-            print("Standard Deviation {X, Y, Z}", hld["deviation"])
-            print("---------------------------------------------------------------------------------------------------")
-
-            # Add high-level data to main structure and reset variables
-            dataset["phone"]["accel"][subject][window] = hld
-            window += 1
+        # Access raw data structure
+        for subject in data[device][sensor]:
+            # Variable to control the number of samples gathered
             sample_count = 0
-            ten_seconds_sample = []
+            window = 0
 
+            # Add subject to high-level feature structure
+            self.dataset[device][sensor][subject] = {}
+
+            # Iterate through the raw_dataset
+            for ts in data[device][sensor][subject]:
+
+                if sample_count is 1:
+                    # Get the item label
+                    label = data[device][sensor][subject][ts]["activity_code"]
+
+                # Variable to hold sample x, y and z values
+                x = data[device][sensor][subject][ts]["x_axis"]
+                y = data[device][sensor][subject][ts]["y_axis"]
+                z = data[device][sensor][subject][ts]["z_axis"]
+                sample_count += 1
+
+                # Add values to sample set
+                ten_seconds_sample.append([x, y, z])
+
+                # Just to debug data
+                # if sample_count % 2 is 0:
+                #     print(sample_set)
+
+                # Extract features and reset the variables after 10s (200 instances)
+                if sample_count is ten_seconds:
+                    hld = get_features(ten_seconds_sample, label)
+
+                    print("Window: ", window)
+                    print("Activity Code: ", hld["activity_code"])
+                    print("Binned X: ", hld["x"])
+                    print("Binned Y: ", hld["y"])
+                    print("Binned Z: ", hld["z"])
+                    print("Average {X, Y, Z}: ", hld["avg"])
+                    print("Variance {X, Y, Z}: ", hld["variance"])
+                    print("Standard Deviation {X, Y, Z}", hld["deviation"])
+                    print("-------------------------------------------------------------------------------------------")
+
+                    # Add high-level data to main structure and reset variables
+                    self.dataset[device][sensor][subject][window] = hld
+                    window += 1
+                    sample_count = 0
+                    ten_seconds_sample = []
+
+    def __init__(self):
+        print("Importing raw dataset")
+        # Import raw dataset
+        raw_dataset = Dataset().dataset
+
+        # Structure
+        self.dataset = {
+            "phone": {
+                "accel": {},
+                "gyro": {}
+            },
+            "watch": {
+                "accel": {},
+                "gyro": {}
+            }
+        }
+
+        print("Extracting features for phone accelerometer")
+        self.add_data("phone", "accel", raw_dataset)
+        # self.add_data("phone", "gyro", raw_dataset)
+        # self.add_data("watch", "accel", raw_dataset)
+        # self.add_data("watch", "gyro", raw_dataset)
