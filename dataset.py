@@ -106,4 +106,4 @@ class Dataset:
         print("Adding phone gyroscope data...")
         # self.add_data("phone", "gyro", phone_gyro)
 
-        print("Finished!")
+        print("Finished raw dataset import!")

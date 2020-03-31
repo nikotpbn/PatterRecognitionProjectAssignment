@@ -1,7 +1,7 @@
 from dataset import Dataset
 import math
 
-debug = False
+debug = True
 
 # Frequency in Hz corresponding to 1s and 10s windows
 one_second = 20
@@ -14,6 +14,12 @@ def get_features(data, code):
     binned_distribution_x = []
     binned_distribution_y = []
     binned_distribution_z = []
+    avg_abs_diff_x = 0
+    avg_abs_diff_y = 0
+    avg_abs_diff_z = 0
+    variance_x = 0
+    variance_y = 0
+    variance_z = 0
     item_count = 0
     total_x = 0
     total_y = 0
@@ -29,11 +35,12 @@ def get_features(data, code):
 
     # Iterate through data to find real max and min values of each axis
     for item in data:
+        # Get total of {x, y, z} for average calculation
         total_x += item[0]
         total_y += item[1]
         total_z += item[2]
 
-        # Get max and min value from X
+        # Check max and min value for X axis
         aux = item[0]
         if aux > x_max:
             x_max = aux
@@ -41,7 +48,7 @@ def get_features(data, code):
             if aux < x_min:
                 x_min = aux
 
-        # Get max and min value from Y
+        # Check max and min value for Y axis
         aux = item[1]
         if aux > y_max:
             y_max = aux
@@ -49,7 +56,7 @@ def get_features(data, code):
             if aux < y_min:
                 y_min = aux
 
-        # Get max and min value from Z
+        # Check max and min value for Z axis
         aux = item[2]
         if aux > z_max:
             z_max = aux
@@ -57,6 +64,7 @@ def get_features(data, code):
             if aux < z_min:
                 z_min = aux
 
+        # Track the number of iteration o data items
         item_count += 1
 
         # Reaching one second (20 instances) add values to the binned distribution vector
@@ -66,6 +74,7 @@ def get_features(data, code):
             y_feature = (y_max - y_min) / 10
             z_feature = (z_max - z_min) / 10
 
+            # Add the calculated values to binned distribution vectors
             binned_distribution_x.append(x_feature)
             binned_distribution_y.append(y_feature)
             binned_distribution_z.append(z_feature)
@@ -75,18 +84,24 @@ def get_features(data, code):
     avg_y = total_y / ten_seconds
     avg_z = total_z / ten_seconds
 
-    # Calculate variance
-    variance_x = 0
-    variance_y = 0
-    variance_z = 0
     for item in data:
+        # Calculate Variance Numerator
         variance_x += math.pow((item[0] - avg_x), 2)
         variance_y += math.pow((item[1] - avg_y), 2)
         variance_z += math.pow((item[2] - avg_z), 2)
 
+        # Calculate MAD (Mean/average Absolute Difference/Deviation) Numerator
+        avg_abs_diff_x = abs(item[0] - avg_x)
+        avg_abs_diff_y = abs(item[1] - avg_y)
+        avg_abs_diff_z = abs(item[2] - avg_z)
+
     variance_x /= ten_seconds
     variance_y /= ten_seconds
     variance_z /= ten_seconds
+
+    avg_abs_diff_x /= ten_seconds
+    avg_abs_diff_y /= ten_seconds
+    avg_abs_diff_z /= ten_seconds
 
     # Calculate standard deviation
     deviation_x = math.sqrt(variance_x)
@@ -101,7 +116,8 @@ def get_features(data, code):
         "z": binned_distribution_z,
         "avg": [avg_x, avg_y, avg_z],
         "variance": [variance_x, variance_y, variance_z],
-        "deviation": [deviation_x, deviation_y, deviation_z]
+        "deviation": [deviation_x, deviation_y, deviation_z],
+        "mad": [avg_abs_diff_x, avg_abs_diff_y, avg_abs_diff_z]
     }
 
     return high_level_data
@@ -138,23 +154,22 @@ class HLDataset:
                 # Add values to sample set
                 ten_seconds_sample.append([x, y, z])
 
-                # Just to debug data
-                # if sample_count % 2 is 0:
-                #     print(sample_set)
-
                 # Extract features and reset the variables after 10s (200 instances)
                 if sample_count is ten_seconds:
                     hld = get_features(ten_seconds_sample, label)
 
-                    print("Window: ", window)
-                    print("Activity Code: ", hld["activity_code"])
-                    print("Binned X: ", hld["x"])
-                    print("Binned Y: ", hld["y"])
-                    print("Binned Z: ", hld["z"])
-                    print("Average {X, Y, Z}: ", hld["avg"])
-                    print("Variance {X, Y, Z}: ", hld["variance"])
-                    print("Standard Deviation {X, Y, Z}", hld["deviation"])
-                    print("-------------------------------------------------------------------------------------------")
+                    # If debug variable is true, print data
+                    if debug:
+                        print("Window: ", window)
+                        print("Activity Code: ", hld["activity_code"])
+                        print("Binned X: ", hld["x"])
+                        print("Binned Y: ", hld["y"])
+                        print("Binned Z: ", hld["z"])
+                        print("Average {X, Y, Z}: ", hld["avg"])
+                        print("Variance {X, Y, Z}: ", hld["variance"])
+                        print("Standard Deviation {X, Y, Z}: ", hld["deviation"])
+                        print("MAD: ", hld["mad"])
+                        print("---------------------------------------------------------------------------------------")
 
                     # Add high-level data to main structure and reset variables
                     self.dataset[device][sensor][subject][window] = hld
@@ -163,11 +178,10 @@ class HLDataset:
                     ten_seconds_sample = []
 
     def __init__(self):
-        print("Importing raw dataset")
         # Import raw dataset
         raw_dataset = Dataset().dataset
 
-        # Structure
+        # Structure to hold high-level features
         self.dataset = {
             "phone": {
                 "accel": {},
@@ -179,8 +193,17 @@ class HLDataset:
             }
         }
 
+        # Extract data from raw dataset and add to new structure
         print("Extracting features for phone accelerometer")
         self.add_data("phone", "accel", raw_dataset)
+
+        print("Extracting features for phone gyroscope")
         # self.add_data("phone", "gyro", raw_dataset)
+
+        print("Extracting features for watch accelerometer")
         # self.add_data("watch", "accel", raw_dataset)
+
+        print("Extracting features for watch gyroscope")
         # self.add_data("watch", "gyro", raw_dataset)
+
+        print("Feature extraction finished!")
