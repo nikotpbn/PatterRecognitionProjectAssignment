@@ -4,7 +4,6 @@ from gui_test import *
 # Colors Definition
 darkBg = '#212121'
 grey = '#e0e0e0'
-semiDarkBg = '#424242'
 
 # Window Definition
 winMenu = Tk()
