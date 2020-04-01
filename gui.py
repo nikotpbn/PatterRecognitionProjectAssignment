@@ -21,7 +21,7 @@ label1.pack()
 
 r = IntVar()
 
-radio1 = Radiobutton(winMenu, text="Binary Classifier", bg=darkBg, fg=grey, font=12, variable=r, value=1).grid(row=1, column=0)
-radio2 = Radiobutton(winMenu, text="Three-class Classifier", bg=darkBg, fg=grey, font=12, variable=r, value=2).grid(row=2, column=0)
+radio1 = Radiobutton(winMenu, text="Binary Classifier", bg=darkBg, fg=grey, font=12, variable=r, value=1).pack()
+radio2 = Radiobutton(winMenu, text="Three-class Classifier", bg=darkBg, fg=grey, font=12, variable=r, value=2).pack()
 
 winMenu.mainloop()
