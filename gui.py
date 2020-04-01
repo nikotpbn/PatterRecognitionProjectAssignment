@@ -26,10 +26,14 @@ def clicked():
     teste(r.get())
 
 
-radio1 = Radiobutton(winMenu, text="Binary Classifier", selectcolor='#512da8', font=12, variable=r,
-                     value="Binary Classifier").pack()
-radio2 = Radiobutton(winMenu, text="Three-class Classifier", selectcolor='#512da8', font=12, variable=r,
-                     value="Three-class Classifier").pack()
+radio1 = Radiobutton(winMenu, text="Phone Accel", selectcolor='#512da8', font=12, variable=r,
+                     value="Phone Accel").pack()
+radio2 = Radiobutton(winMenu, text="Phone Gyro", selectcolor='#512da8', font=12, variable=r,
+                     value="Phone Gyro").pack()
+radio3 = Radiobutton(winMenu, text="Watch Accel", selectcolor='#512da8', font=12, variable=r,
+                     value="Watch Accel").pack()
+radio4 = Radiobutton(winMenu, text="Watch Gyro", selectcolor='#512da8', font=12, variable=r,
+                     value="Watch Gyro").pack()
 
 button1 = Button(winMenu, text="Click", command=clicked).pack()
 
