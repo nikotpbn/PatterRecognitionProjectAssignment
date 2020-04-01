@@ -1,2 +1,4 @@
 /wisdm-dataset/
 .gitignore
+__pycache__
+.idea
