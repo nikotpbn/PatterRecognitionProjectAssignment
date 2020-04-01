@@ -4,6 +4,7 @@ from gui_test import *
 # Colors Definition
 darkBg = '#212121'
 grey = '#e0e0e0'
+semiDarkBg = '#424242'
 
 # Window Definition
 winMenu = Tk()
@@ -23,17 +24,26 @@ r = StringVar()
 
 
 def clicked():
-    teste(r.get())
+    teste(r.get(), scale1.get())
 
 
 radio1 = Radiobutton(winMenu, text="Phone Accel", selectcolor='#512da8', font=12, variable=r,
-                     value="Phone Accel").pack()
+                     value="PA").pack()
 radio2 = Radiobutton(winMenu, text="Phone Gyro", selectcolor='#512da8', font=12, variable=r,
-                     value="Phone Gyro").pack()
+                     value="PG").pack()
 radio3 = Radiobutton(winMenu, text="Watch Accel", selectcolor='#512da8', font=12, variable=r,
-                     value="Watch Accel").pack()
+                     value="WA").pack()
 radio4 = Radiobutton(winMenu, text="Watch Gyro", selectcolor='#512da8', font=12, variable=r,
-                     value="Watch Gyro").pack()
+                     value="WG").pack()
+
+label2 = Label(winMenu,
+               text="Select the number of features",
+               font=16,
+               pady=30)
+label2.pack()
+
+scale1 = Scale(winMenu, from_=1, to=91, orient=HORIZONTAL, sliderlength= 15, length= 400, troughcolor='#512da8', tickinterval= 10)
+scale1.pack()
 
 button1 = Button(winMenu, text="Click", command=clicked).pack()
 

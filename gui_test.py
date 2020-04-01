@@ -1,2 +1,3 @@
-def teste(msg):
-    print("dataset escolhido ", msg)
+def teste(msg, ftr):
+    print("dataset Escolhido:", msg)
+    print("Features Escolhidas:", ftr)
