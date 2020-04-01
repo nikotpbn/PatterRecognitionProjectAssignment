@@ -19,13 +19,17 @@ label1 = Label(winMenu,
 label1.config(anchor=CENTER)
 label1.pack()
 
-r = IntVar()
+r = StringVar()
+
 
 def clicked():
-    teste()
+    teste(r.get())
 
-radio1 = Radiobutton(winMenu, text="Binary Classifier", selectcolor='#512da8', font=12, variable=r, value=1).pack()
-radio2 = Radiobutton(winMenu, text="Three-class Classifier", selectcolor='#512da8', font=12, variable=r, value=2).pack()
+
+radio1 = Radiobutton(winMenu, text="Binary Classifier", selectcolor='#512da8', font=12, variable=r,
+                     value="Binary Classifier").pack()
+radio2 = Radiobutton(winMenu, text="Three-class Classifier", selectcolor='#512da8', font=12, variable=r,
+                     value="Three-class Classifier").pack()
 
 button1 = Button(winMenu, text="Click", command=clicked).pack()
 

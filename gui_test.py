@@ -1,2 +1,2 @@
-def teste():
-    print("chamando outro arquivo python")
+def teste(msg):
+    print("dataset escolhido ", msg)
