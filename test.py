@@ -89,6 +89,8 @@ new_data = pca.fit_transform(data["data"])
 data["data"] = new_data
 
 # -------------------- Classifiers --------------------
+numbers_runs = 0
+numbers_subsets = 0
 # TODO -------------------- Classifier: Minimum distance classifier (MDC) --------------------
 
 # TODO -------------------- Classifier: Fisher LDA --------------------
