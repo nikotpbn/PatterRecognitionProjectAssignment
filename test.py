@@ -1,11 +1,14 @@
 # Imports
-from arff_dataset import Dataset
-import pandas as pd
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from arff_dataset import Dataset
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
+from sklearn.decomposition import PCA
+from scipy.optimize import linprog
 
-# Load the dataset
+# Load the dataset and variables
 data = Dataset().get_database("PA")
 
 # -------------------- Feature selection (K bests) --------------------
@@ -18,10 +21,6 @@ new_label = [data["label"][i] for i in indexes]
 # Update dataset replacing the old data and label to the bests
 data["data"] = new_data
 data["label"] = new_label
-
-# -------------------- Feature selection result --------------------
-# print(new_data)
-# print(new_label)
 
 # -------------------- Feature Reduction --------------------
 # Variables
@@ -59,12 +58,35 @@ for feature in redundant_features_idx:
 data["data"] = np.transpose(new_data)
 data["label"] = new_label
 
-# -------------------- Feature Reduction result --------------------
-# print(data["data"])
-# print(data["label"])
-# print(redundant_features_label)
+# -------------------- PCA (Kaiser or Scree) --------------------
+# First apply PCA and show 2 plots: 1) variance (pca.explained_variance_ratio_); 2) values (pca.singular_values_) then
+# choose the number of features to be used and execute pca again.
 
-# TODO -------------------- PCA (Kaiser or Scree) --------------------
+# PCA for reduction analysis
+pca = PCA()
+pca.fit(data["data"])
+
+# Plots
+# Preparations to plot
+x_values = np.arange(1, len(data["label"]) + 1)
+# Plot Eigenvalues
+plt.plot(x_values, pca.singular_values_, 'ro')
+plt.title('Principal Component Analysis (PCA)')
+plt.xlabel('Principal Components')
+plt.ylabel('Eigenvalues')
+plt.show()
+# Plot percentage of variance graphic
+plt.plot(x_values, (np.cumsum(pca.explained_variance_)/sum(pca.explained_variance_))*100, 'ro')
+plt.title('Principal Component Analysis (PCA)')
+plt.xlabel('Principal Components')
+plt.ylabel('Percentage of variance')
+plt.show()
+
+# PCA application
+n_features = len(data["label"]) - 2
+pca = PCA(n_components=n_features)
+new_data = pca.fit_transform(data["data"])
+data["data"] = new_data
 
 # -------------------- Classifiers --------------------
 # TODO -------------------- Classifier: Minimum distance classifier (MDC) --------------------
