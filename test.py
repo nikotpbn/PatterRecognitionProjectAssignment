@@ -7,6 +7,8 @@ from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
 from sklearn.decomposition import PCA
 from sklearn.model_selection import KFold
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.metrics import confusion_matrix, classification_report, multilabel_confusion_matrix
 
 # Load the dataset and variables
 data = Dataset().get_database("PA")
@@ -89,15 +91,54 @@ new_data = pca.fit_transform(data["data"])
 data["data"] = new_data
 
 # -------------------- Classifiers --------------------
+# Variables
 numbers_runs = 1
-numbers_subsets = 10
-for i in range(0, numbers_runs):
-    kf = KFold(n_splits=numbers_subsets)
-    for train_indexes, test_indexes in kf.split(data["data"], data["target"]):
-        print("TRAIN:", train_indexes, "TEST:", test_indexes)
-        # TODO -------------------- Classifier: Minimum distance classifier (MDC) --------------------
+numbers_subsets = 2
+classifier = 'fisherLDA'
+results = {
+    'Misclassification': 0,
+    'Sensitivity': 0,
+    'Specificity': 0
+}
 
-        # TODO -------------------- Classifier: Fisher LDA --------------------
-        pass
+for i in range(0, numbers_runs):
+    # Apply K-fold
+    kf = KFold(n_splits=numbers_subsets)
+    # K-fold Executions
+    for idx_train, idx_test in kf.split(data["data"], data["target"]):
+        # Train data
+        x_train = [data["data"][idx] for idx in idx_train]
+        x_train = np.asarray(x_train).astype(np.float64)
+        y_train = [data["target"][idx] for idx in idx_train]
+        # Test data
+        x_test = [data["data"][idx] for idx in idx_test]
+        x_test = np.asarray(x_test).astype(np.float64)
+        y_test = [data["target"][idx] for idx in idx_test]
+
+        # TODO -------------------- Classifier: Minimum distance classifier (MDC) --------------------
+        if classifier == 'mdc':
+            pass
+        # -------------------- Classifier: Fisher LDA --------------------
+        if classifier == 'fisherLDA':
+            # Classifier training
+            lda = LinearDiscriminantAnalysis().fit(x_train, y_train)
+            # Classifier test
+            predict = lda.predict(x_test)
+            cm = confusion_matrix(y_test, predict)
+
+        # Results calculations
+        fp = round(sum(cm.sum(axis=0) - np.diag(cm)) / len(cm.sum(axis=0) - np.diag(cm)))
+        fn = round(sum(cm.sum(axis=1) - np.diag(cm)) / len(cm.sum(axis=1) - np.diag(cm)))
+        tp = round(sum(np.diag(cm)) / len(np.diag(cm)))
+        tn = cm.sum() - (fp + fn + tp)
+        results['Misclassification'] += (fp + fn) / (tp + tn + fp + fn)
+        results['Sensitivity'] += fp / (tp + fn)
+        results['Specificity'] += fp / (fp + tn)
+
+results['Misclassification'] = (results['Misclassification'] / (numbers_runs * numbers_subsets)) * 100
+results['Sensitivity'] = results['Sensitivity'] / (numbers_runs * numbers_subsets)
+results['Specificity'] = results['Specificity'] / (numbers_runs * numbers_subsets)
+
 # -------------------- Print Results or save code --------------------
+print(results)
 # pandadataframe = pd.DataFrame(data=data["data"], columns=data["label"])

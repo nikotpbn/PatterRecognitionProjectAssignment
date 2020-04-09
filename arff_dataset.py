@@ -1,7 +1,7 @@
 import glob
 import pathlib
 import re
-import numpy
+import numpy as np
 
 # Dúvidas:
 # 1) Qual dataset usar? so arff
@@ -111,9 +111,9 @@ class Dataset:
             file_number += 1
 
         # Add the data read into the dataset attribute
-        self.dataset[device][sensor]["data"] = numpy.asarray(data).astype(numpy.float64)
-        self.dataset[device][sensor]["target"] = numpy.asarray(target)
-        self.dataset[device][sensor]["label"] = numpy.asarray(label)
+        self.dataset[device][sensor]["data"] = np.asarray(data).astype(np.float64)
+        self.dataset[device][sensor]["target"] = np.asarray(target)
+        self.dataset[device][sensor]["label"] = np.asarray(label)
 
     def get_database(self, device_sensor):
         if device_sensor == "PA":
