@@ -6,7 +6,7 @@ from arff_dataset import Dataset
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
 from sklearn.decomposition import PCA
-from scipy.optimize import linprog
+from sklearn.model_selection import KFold
 
 # Load the dataset and variables
 data = Dataset().get_database("PA")
@@ -89,11 +89,15 @@ new_data = pca.fit_transform(data["data"])
 data["data"] = new_data
 
 # -------------------- Classifiers --------------------
-numbers_runs = 0
-numbers_subsets = 0
-# TODO -------------------- Classifier: Minimum distance classifier (MDC) --------------------
+numbers_runs = 1
+numbers_subsets = 10
+for i in range(0, numbers_runs):
+    kf = KFold(n_splits=numbers_subsets)
+    for train_indexes, test_indexes in kf.split(data["data"], data["target"]):
+        print("TRAIN:", train_indexes, "TEST:", test_indexes)
+        # TODO -------------------- Classifier: Minimum distance classifier (MDC) --------------------
 
-# TODO -------------------- Classifier: Fisher LDA --------------------
-
+        # TODO -------------------- Classifier: Fisher LDA --------------------
+        pass
 # -------------------- Print Results or save code --------------------
 # pandadataframe = pd.DataFrame(data=data["data"], columns=data["label"])
