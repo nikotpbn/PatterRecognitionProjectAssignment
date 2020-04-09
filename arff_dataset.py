@@ -78,6 +78,8 @@ class Dataset:
         print("Reading watch-gyroscope...")
         self.add_data(watch_gyro, "watch", "gyro")
 
+        print("Finished.")
+
     def add_data(self, data_files, device, sensor):
         # Variable
         file_number = 1
