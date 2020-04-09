@@ -1,6 +1,5 @@
 # Imports
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 from arff_dataset import Dataset
 from sklearn.feature_selection import SelectKBest
@@ -8,7 +7,7 @@ from sklearn.feature_selection import f_classif
 from sklearn.decomposition import PCA
 from sklearn.model_selection import KFold
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from sklearn.metrics import confusion_matrix, classification_report, multilabel_confusion_matrix
+from sklearn.metrics import confusion_matrix
 
 # Load the dataset and variables
 data = Dataset().get_database("PA")
@@ -61,9 +60,6 @@ data["data"] = np.transpose(new_data)
 data["label"] = new_label
 
 # -------------------- PCA (Kaiser or Scree) --------------------
-# First apply PCA and show 2 plots: 1) variance (pca.explained_variance_ratio_); 2) values (pca.singular_values_) then
-# choose the number of features to be used and execute pca again.
-
 # PCA for reduction analysis
 pca = PCA()
 pca.fit(data["data"])
@@ -100,7 +96,6 @@ results = {
     'Sensitivity': 0,
     'Specificity': 0
 }
-
 for i in range(0, numbers_runs):
     # Apply K-fold
     kf = KFold(n_splits=numbers_subsets)
@@ -114,7 +109,6 @@ for i in range(0, numbers_runs):
         x_test = [data["data"][idx] for idx in idx_test]
         x_test = np.asarray(x_test).astype(np.float64)
         y_test = [data["target"][idx] for idx in idx_test]
-
         # TODO -------------------- Classifier: Minimum distance classifier (MDC) --------------------
         if classifier == 'mdc':
             pass
@@ -125,7 +119,6 @@ for i in range(0, numbers_runs):
             # Classifier test
             predict = lda.predict(x_test)
             cm = confusion_matrix(y_test, predict)
-
         # Results calculations
         fp = round(sum(cm.sum(axis=0) - np.diag(cm)) / len(cm.sum(axis=0) - np.diag(cm)))
         fn = round(sum(cm.sum(axis=1) - np.diag(cm)) / len(cm.sum(axis=1) - np.diag(cm)))
@@ -134,7 +127,7 @@ for i in range(0, numbers_runs):
         results['Misclassification'] += (fp + fn) / (tp + tn + fp + fn)
         results['Sensitivity'] += fp / (tp + fn)
         results['Specificity'] += fp / (fp + tn)
-
+# End results calculations
 results['Misclassification'] = (results['Misclassification'] / (numbers_runs * numbers_subsets)) * 100
 results['Sensitivity'] = results['Sensitivity'] / (numbers_runs * numbers_subsets)
 results['Specificity'] = results['Specificity'] / (numbers_runs * numbers_subsets)
