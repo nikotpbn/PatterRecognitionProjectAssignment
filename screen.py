@@ -27,7 +27,7 @@ RBDatabase4 = Radiobutton(databaseFrame, variable=opt_database, value=4, text="G
 RBDatabase4.grid(row=1, column=1)
 
 # Scenario Options
-scenarioFrame = LabelFrame(first_screen, text="   Select the Scenario to be used   ")
+scenarioFrame = LabelFrame(first_screen, text="   Select the scenario to be used   ")
 scenarioFrame.pack(pady=15)
 opt_scenario = IntVar()
 RBScenario1 = Radiobutton(scenarioFrame, variable=opt_scenario, value=1, text="Scenario A", selectcolor=darkBg)
@@ -36,5 +36,14 @@ RBScenario2 = Radiobutton(scenarioFrame, variable=opt_scenario, value=2, text="S
 RBScenario2.grid(row=0, column=1)
 RBScenario3 = Radiobutton(scenarioFrame, variable=opt_scenario, value=3, text="Scenario C", selectcolor=darkBg, state=DISABLED)
 RBScenario3.grid(row=1, column=0, columnspan=2)
+
+# Feature Selection Options
+featureSelectionFrame = LabelFrame(first_screen, text="   Select the feature selection method to be used   ")
+featureSelectionFrame.pack(pady=15)
+opt_feature_selection = IntVar()
+RBScenario1 = Radiobutton(scenarioFrame, variable=opt_scenario, value=1, text="Scenario A", selectcolor=darkBg)
+RBScenario1.grid(row=0, column=0)
+RBScenario2 = Radiobutton(scenarioFrame, variable=opt_scenario, value=2, text="Scenario B", selectcolor=darkBg, state=DISABLED)
+RBScenario2.grid(row=0, column=1)
 
 first_screen.mainloop()
