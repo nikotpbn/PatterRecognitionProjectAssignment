@@ -10,7 +10,14 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.metrics import confusion_matrix
 
 # Load the dataset and variables
+scenario = "A"
 data = Dataset().get_database("PA")
+
+# -------------------- Scenario Definition --------------------
+if scenario == "A":
+    for i in range(0, len(data["label"])):
+        if data["label"][i] is not "A":
+            data["label"][i] = "B"
 
 # -------------------- Feature selection (K bests) --------------------
 # Choosing the K best features
