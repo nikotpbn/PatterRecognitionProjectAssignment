@@ -15,9 +15,9 @@ data = Dataset().get_database("PA")
 
 # -------------------- Scenario Definition --------------------
 if scenario == "A":
-    for i in range(0, len(data["label"])):
-        if data["label"][i] is not "A":
-            data["label"][i] = "B"
+    for i in range(0, len(data["target"])):
+        if data["target"][i] is not "A":
+            data["target"][i] = "B"
 
 # -------------------- Feature selection (K bests) --------------------
 # Choosing the K best features
