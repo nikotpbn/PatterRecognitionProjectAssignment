@@ -14,10 +14,9 @@ labels = dataset["label"]
 new_data = []
 new_labels = []
 
+# -------------------- Feature selection (Kruskal-Wallis) --------------------
 # Array to hold H values and indexes from Kruskal-Wallis method
 h_array = []
-
-# -------------------- Feature selection (Kruskal-Wallis) --------------------
 # Compute H value for each pattern
 for i in range(0, len(data)):
     k = stats.kruskal(data[i, :], targets)

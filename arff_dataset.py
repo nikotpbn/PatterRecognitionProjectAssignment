@@ -63,22 +63,22 @@ class Dataset:
 
         # Read data
         # Phone-accelerometer data
-        print("Reading phone-accelerometer...")
+        # print("Reading phone-accelerometer...")
         self.add_data(phone_accel, "phone", "accel")
 
         # Phone-gyroscope data
-        print("Reading phone-gyroscope...")
+        # print("Reading phone-gyroscope...")
         self.add_data(phone_gyro, "phone", "gyro")
 
         # Watch-accelerometer data
-        print("Reading watch-accelerometer...")
+        # print("Reading watch-accelerometer...")
         self.add_data(watch_accel, "watch", "accel")
 
         # Watch-gyroscope data
-        print("Reading watch-gyroscope...")
+        # print("Reading watch-gyroscope...")
         self.add_data(watch_gyro, "watch", "gyro")
 
-        print("Finished.")
+        # print("Finished.")
 
     def add_data(self, data_files, device, sensor):
         # Variable
