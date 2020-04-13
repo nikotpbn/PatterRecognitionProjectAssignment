@@ -1,5 +1,6 @@
 # Imports
 import numpy as np
+import scipy as sp
 import matplotlib.pyplot as plt
 from arff_dataset import Dataset
 from sklearn.feature_selection import SelectKBest
@@ -8,6 +9,8 @@ from sklearn.decomposition import PCA
 from sklearn.model_selection import KFold
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.metrics import confusion_matrix
+
+from sklearn.covariance import MinCovDet, EmpiricalCovariance
 
 # Load the dataset and variables
 scenario = "A"
@@ -97,7 +100,7 @@ data["data"] = new_data
 # Variables
 numbers_runs = 1
 numbers_subsets = 2
-classifier = 'fisherLDA'
+classifier = 'MDC'
 results = {
     'Misclassification': 0,
     'Sensitivity': 0,
@@ -117,8 +120,48 @@ for i in range(0, numbers_runs):
         x_test = np.asarray(x_test).astype(np.float64)
         y_test = [data["target"][idx] for idx in idx_test]
         # TODO -------------------- Classifier: Minimum distance classifier (MDC) --------------------
-        if classifier == 'mdc':
-            pass
+        if classifier == 'MDC':
+            # Transpose x_train and y_train to: feature x readings
+            train_x = np.transpose(x_train)
+            test_x = np.transpose(x_test)
+
+            # Get indexes of the classes
+            ix_w1 = np.nonzero(np.in1d(y_train, 'A'))
+            ix_w2 = np.nonzero(np.in1d(y_train, 'B'))
+
+            # Calculate the mean of features for each pattern
+            mu1 = np.mean(train_x[:, ix_w1], 2)
+            mu2 = np.mean(train_x[:, ix_w2], 2)
+
+            # print("MU1", mu1.shape)
+            # print("MU2", mu2.shape)
+
+            # Array to hold prediction
+            predict = []
+
+            # Iterate through test data
+            for k in range(0, len(test_x[1])):
+                # 1st part of euclidian general formula
+                test_sample = np.transpose(np.array([test_x[:, k]]))
+                g1 = mu1.transpose().dot(test_sample)
+                g2 = mu1.transpose().dot(test_sample)
+
+                # 2nd part of euclidian general formula
+                mm1 = np.dot(0.5, mu1.transpose().dot(mu1))
+                mm2 = np.dot(0.5, mu1.transpose().dot(mu2))
+
+                g1 = g1 - mm1
+                g2 = g1 - mm2
+
+                if g1 >= g2:
+                    predict.append('A')
+                    print("For k=",  k, ".Prediction was A")
+                else:
+                    predict.append('B')
+                    # print("For k=",  k, ".Prediction was B")
+
+            cm = confusion_matrix(y_test, predict)
+
         # -------------------- Classifier: Fisher LDA --------------------
         if classifier == 'fisherLDA':
             # Classifier training
