@@ -76,7 +76,6 @@ def feature_selection_and_reduction(database, scenario, fr_method, n_features):
         # Update dataset replacing the old data and labels
         data["data"] = np.transpose(np.array(new_data))
         data["label"] = new_labels
-        pass
     
     # -------------------- Feature Reduction --------------------
     # Variables
