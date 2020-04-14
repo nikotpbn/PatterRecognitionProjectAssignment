@@ -1,7 +1,6 @@
 # Imports
 import tkinter as tk
 from tkinter import *
-from tkinter import ttk
 import rp
 import matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg

@@ -19,12 +19,14 @@ def feature_selection_and_reduction(database, scenario, fr_method, n_features):
     # -------------------- Scenario Definition --------------------
     if scenario == "A":
         data = Dataset().get_database(database)
+
+        # Set patterns for binary classification
         for i in range(0, len(data["target"])):
             if data["target"][i] != "A":
                 data["target"][i] = "B"
 
+    # -------------------- Feature selection (K bests) --------------------
     if fr_method == 1:
-        # -------------------- Feature selection (K bests) --------------------
         # Choosing the K best features
         selector = SelectKBest(f_classif, k=n_features)
         new_data = selector.fit_transform(data["data"], data["target"])
@@ -34,7 +36,46 @@ def feature_selection_and_reduction(database, scenario, fr_method, n_features):
         # Update dataset replacing the old data and label to the bests
         data["data"] = new_data
         data["label"] = new_label
+
+    # ----------------- Feature selection (Kruskal-Wallis) -----------------
     elif fr_method == 2:
+        # Get information from the dataset
+        t_data = np.transpose(data["data"])
+        targets = data["target"]
+        labels = data["label"]
+        new_data = []
+        new_labels = []
+
+        # Array to hold H values and indexes from Kruskal-Wallis method
+        h_array = []
+        # Compute H value for each pattern
+        for i in range(0, len(t_data)):
+            k = stats.kruskal(t_data[i, :], targets)
+            h_value = k[0]
+            values = (h_value, i)
+
+            # Add index and H value to array
+            h_array.append(values)
+
+        # Sort array in crescent order
+        sorted_h = sorted(h_array, key=lambda h_val: h_val[0])
+
+        # Select patterns using index from computed H value
+        for i in range(0, n_features):
+            # Get index from sorted H array
+            index = sorted_h[i][1]
+
+            # Use index value to get the pattern from data matrix and label from labels array
+            pattern = t_data[index].tolist()
+            label = labels[index]
+
+            # Add values to new arrays
+            new_data.append(pattern)
+            new_labels.append(label)
+
+        # Update dataset replacing the old data and labels
+        data["data"] = np.transpose(np.array(new_data))
+        data["label"] = new_labels
         pass
     
     # -------------------- Feature Reduction --------------------
@@ -114,7 +155,43 @@ def classifier(data, classifier_opt, n_runs, n_subsets):
             y_test = [data["target"][idx] for idx in idx_test]
             # -------------------- Classifier: Minimum distance classifier (MDC) --------------------
             if classifier_opt == 1:
-                pass
+                # Transpose x_train and y_train to feature x readings
+                train_x = np.transpose(x_train)
+                test_x = np.transpose(x_test)
+
+                # Get indexes of the classes
+                ix_w1 = np.nonzero(np.in1d(y_train, 'A'))
+                ix_w2 = np.nonzero(np.in1d(y_train, 'B'))
+
+                # Calculate the mean of features for each pattern
+                mu1 = np.mean(train_x[:, ix_w1], 2)
+                mu2 = np.mean(train_x[:, ix_w2], 2)
+
+                # Array to hold prediction
+                predict = []
+
+                # Iterate through test data
+                for k in range(0, len(test_x[1])):
+                    # 1st part of euclidian general formula
+                    test_sample = np.transpose(np.array([test_x[:, k]]))
+                    g1 = mu1.transpose().dot(test_sample)
+                    g2 = mu1.transpose().dot(test_sample)
+
+                    # 2nd part of euclidian general formula
+                    mu1sqr = mu1.transpose().dot(mu1)
+                    mu2sqr = mu1.transpose().dot(mu2)
+
+                    g1 = g1 - mu1sqr
+                    g2 = g2 - mu2sqr
+
+                    if g1 >= g2:
+                        predict.append('A')
+                        print("For k=", k, ".Prediction was A")
+                    else:
+                        predict.append('B')
+                        # print("For k=",  k, ".Prediction was B")
+
+                cm = confusion_matrix(y_test, predict)
             # -------------------- Classifier: Fisher LDA --------------------
             if classifier_opt == 2:
                 # Classifier training

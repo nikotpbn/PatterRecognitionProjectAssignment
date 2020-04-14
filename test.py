@@ -147,8 +147,8 @@ for i in range(0, numbers_runs):
                 g2 = mu1.transpose().dot(test_sample)
 
                 # 2nd part of euclidian general formula
-                mm1 = np.dot(0.5, mu1.transpose().dot(mu1))
-                mm2 = np.dot(0.5, mu1.transpose().dot(mu2))
+                mm1 = mu1.transpose().dot(mu1)
+                mm2 = mu1.transpose().dot(mu2)
 
                 g1 = g1 - mm1
                 g2 = g1 - mm2
