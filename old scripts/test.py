@@ -109,6 +109,8 @@ results = {
 for i in range(0, numbers_runs):
     # Apply K-fold
     kf = KFold(n_splits=numbers_subsets)
+    misclassification = 0
+
     # K-fold Executions
     for idx_train, idx_test in kf.split(data["data"], data["target"]):
         # Train data
@@ -175,8 +177,10 @@ for i in range(0, numbers_runs):
         tp = round(sum(np.diag(cm)) / len(np.diag(cm)))
         tn = cm.sum() - (fp + fn + tp)
         results['Misclassification'] += (fp + fn) / (tp + tn + fp + fn)
+        misclassification += (fp + fn) / (tp + tn + fp + fn)
         results['Sensitivity'] += fp / (tp + fn)
         results['Specificity'] += fp / (fp + tn)
+
 # End results calculations
 results['Misclassification'] = (results['Misclassification'] / (numbers_runs * numbers_subsets)) * 100
 results['Sensitivity'] = results['Sensitivity'] / (numbers_runs * numbers_subsets)

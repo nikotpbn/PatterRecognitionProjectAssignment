@@ -22,8 +22,8 @@ def feature_selection_and_reduction(database, scenario, fr_method, n_features):
 
         # Set patterns for binary classification
         for i in range(0, len(data["target"])):
-            if data["target"][i] != "A":
-                data["target"][i] = "B"
+            if data["target"][i] != "B":
+                data["target"][i] = "A"
 
     # -------------------- Feature selection (K bests) --------------------
     if fr_method == 1:
@@ -134,6 +134,8 @@ def pca_method(data, n_features):
 
 
 def classifier(data, classifier_opt, n_runs, n_subsets):
+    tests_results = {}
+
     results = {
         'Misclassification': 0,
         'Sensitivity': 0,
@@ -142,12 +144,15 @@ def classifier(data, classifier_opt, n_runs, n_subsets):
     for i in range(0, n_runs):
         # Apply K-fold
         kf = KFold(n_splits=n_subsets)
+        misclassification_per_run = 0
+
         # K-fold Executions
         for idx_train, idx_test in kf.split(data["data"], data["target"]):
             # Train data
             x_train = [data["data"][idx] for idx in idx_train]
             x_train = np.asarray(x_train).astype(np.float64)
             y_train = [data["target"][idx] for idx in idx_train]
+
             # Test data
             x_test = [data["data"][idx] for idx in idx_test]
             x_test = np.asarray(x_test).astype(np.float64)
@@ -174,18 +179,18 @@ def classifier(data, classifier_opt, n_runs, n_subsets):
                     # 1st part of euclidian general formula
                     test_sample = np.transpose(np.array([test_x[:, k]]))
                     g1 = mu1.transpose().dot(test_sample)
-                    g2 = mu1.transpose().dot(test_sample)
+                    g2 = mu2.transpose().dot(test_sample)
 
                     # 2nd part of euclidian general formula
-                    mu1sqr = mu1.transpose().dot(mu1)
-                    mu2sqr = mu1.transpose().dot(mu2)
+                    mu1sqr = np.dot(0.5, mu1.transpose().dot(mu1))
+                    mu2sqr = np.dot(0.5, mu2.transpose().dot(mu2))
 
-                    g1 = g1 - mu1sqr
-                    g2 = g2 - mu2sqr
+                    g1 -= mu1sqr
+                    g2 -= mu2sqr
 
                     if g1 >= g2:
                         predict.append('A')
-                        print("For k=", k, ".Prediction was A")
+                        # print("For k=", k, ".Prediction was A")
                     else:
                         predict.append('B')
                         # print("For k=",  k, ".Prediction was B")
@@ -198,16 +203,29 @@ def classifier(data, classifier_opt, n_runs, n_subsets):
                 # Classifier test
                 predict = lda.predict(x_test)
                 cm = confusion_matrix(y_test, predict)
-            # Results calculations
+
+            # Results
             fp = round(sum(cm.sum(axis=0) - np.diag(cm)) / len(cm.sum(axis=0) - np.diag(cm)))
             fn = round(sum(cm.sum(axis=1) - np.diag(cm)) / len(cm.sum(axis=1) - np.diag(cm)))
             tp = round(sum(np.diag(cm)) / len(np.diag(cm)))
             tn = cm.sum() - (fp + fn + tp)
+
             results['Misclassification'] += (fp + fn) / (tp + tn + fp + fn)
+            misclassification_per_run += (fp + fn) / (tp + tn + fp + fn)
             results['Sensitivity'] += fp / (tp + fn)
             results['Specificity'] += fp / (fp + tn)
+
+        # Save results per run
+        misclassification_per_run /= n_subsets
+        tests_results[i] = {
+            'misclassification': misclassification_per_run
+        }
+
     # End results calculations
     results['Misclassification'] = (results['Misclassification'] / (n_runs * n_subsets))
     results['Sensitivity'] = results['Sensitivity'] / (n_runs * n_subsets)
     results['Specificity'] = results['Specificity'] / (n_runs * n_subsets)
+
+    print(tests_results)
+
     return results
