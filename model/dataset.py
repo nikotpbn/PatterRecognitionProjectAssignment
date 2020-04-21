@@ -146,7 +146,6 @@ class Dataset:
             # Delete the class Sitting (D) from the data and target
             self.dataset["data"] = np.delete(self.dataset["data"], class_for_delete, axis=0)
             self.dataset["target"] = np.delete(self.dataset["target"], class_for_delete, axis=0)
-            print(self.dataset["target"])
         # Scenario C - Don't need to do anything, because the data already divide correctly
         if scenario == 3:
             self.scenario_selected_str = "Scenario C"

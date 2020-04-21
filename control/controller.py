@@ -1,11 +1,13 @@
 # Imports
 # General
 from model.dataset import Dataset
-from model.rp_methods import kbest, kruskal_wallis, feature_reduction
+from model.rp_methods import kbest, kruskal_wallis, feature_reduction, pca_analisys, run_pca
 # Views
 from view.data_import import DataImport as ViewDataImport
 from view.feature_selection_and_reduction import FeatureSelectionAndReduction as ViewFeatureSelectionAndReduction
 from view.pca_utilization import PCAUtilization as ViewPCAUtilization
+from view.pca_graphics import PCAGraphics as ViewPCAGraphics
+from view.choose_classifier import ChooseClassifier as ViewChooseClassifier
 
 
 # Class controller
@@ -20,6 +22,8 @@ class Controller:
         self.feature_selection_view = None
         self.feature_selection_view = None
         self.pca_utilization_view = None
+        self.pca_graphics_view = None
+        self.choose_classifier_view = None
 
     # Create first screen: screen to select the database and the scenario to be used.
     def start(self):
@@ -69,18 +73,37 @@ class Controller:
 
     def run_pca_analisys(self):
         # Data processing
-        # ----
+        # Run the PCA analisys
+        explained_variance_, x_values, singular_values_ = pca_analisys(self.data.dataset)
 
         # Screens processing
         # Destroy pca_utilization_view
-        self.feature_selection_view.dismiss()
-        # Create the new screen: ????
+        self.pca_utilization_view.dismiss()
+        # Create the new screen: pca_graphics_view
+        self.pca_graphics_view = ViewPCAGraphics()
+        self.pca_graphics_view.show(self, explained_variance_, x_values, singular_values_)
 
-    def run_pca(self):
-        pass
+    def choose_classifier(self, n_features):
+        # Data processing
+        # Apply PCA if the the function call came from run_pca_analisys
+        if n_features != 0:
+            self.data.dataset = run_pca(self.data.dataset, n_features)
 
-    def classifiers(self):
-        pass
+        # Screens processing
+        # Destroy pca_graphics_view
+        if n_features != 0:
+            self.pca_graphics_view.dismiss()
+        else:
+            self.pca_utilization_view.dismiss()
+        # Create the new screen: choose_classifier_view
+        self.choose_classifier_view = ViewChooseClassifier()
+        self.choose_classifier_view.show(self)
+
+    def apply_classifier(self, n_run, n_subsets, classifier, constant_value):
+        print(n_run)
+        print(n_subsets)
+        print(classifier)
+        print(constant_value)
 
 
 # Run Program

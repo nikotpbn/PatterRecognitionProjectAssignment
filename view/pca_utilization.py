@@ -52,7 +52,7 @@ class PCAUtilization:
         button3 = Button(
             self.screen_pca_utilization,
             text="Skip PCA",
-            command=controller.classifiers)
+            command=lambda: controller.choose_classifier(0))
         button3.config(height=3, width=50)
         button3.pack(pady=5)
 
@@ -62,7 +62,7 @@ class PCAUtilization:
     def show_features(self, controller):
         # Window Definition to show features
         screen_show_features = tk.Tk()
-        screen_show_features.title("RP Assignment: PCA Utilization")
+        screen_show_features.title("RP Assignment: Show features")
         screen_show_features['bg'] = self.background_color
         screen_show_features.geometry("230x700")
         screen_show_features.tk_setPalette(

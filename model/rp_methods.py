@@ -101,58 +101,19 @@ def feature_reduction(data):
     return data, redundant_features_label
 
 
+def pca_analisys(data):
+    # PCA for reduction analysis
+    pca = PCA()
+    pca.fit(data["data"])
+    # Plots
+    # Preparations to plot
+    x_values = np.arange(1, len(data["label"]) + 1)
+    return pca.explained_variance_, x_values, pca.singular_values_
 
-# # Method to apply the feature selection (K-bests or Kruskal-Wallis)
-# def feature_selection(data, fr_method, n_features):
-#     # K-bests method
-#     if fr_method == 1:
-#         # Choosing the K-best features to be used
-#         selector = SelectKBest(f_classif, k=n_features)
-#         new_data = selector.fit_transform(data["data"], data["target"])
-#         # Recover from the model the indexes that represent the features maintained, and keep them in the label vector
-#         indexes = selector.get_support(indices=True)
-#         new_label = [data["label"][i] for i in indexes]
-#
-#         # Update dataset replacing the old data and label to the bests
-#         data["data"] = new_data
-#         data["label"] = new_label
-#     # Kruskal-Wallis method
-#     elif fr_method == 2:
-#         # Get information from the dataset
-#         t_data = np.transpose(data["data"])
-#         targets = data["target"]
-#         labels = data["label"]
-#         new_data = []
-#         new_labels = []
-#
-#         # Array to hold H values and indexes from Kruskal-Wallis method
-#         h_array = []
-#         # Compute H value for each pattern
-#         for i in range(0, len(t_data)):
-#             k = stats.kruskal(t_data[i, :], targets)
-#             h_value = k[0]
-#             values = (h_value, i)
-#
-#             # Add index and H value to array
-#             h_array.append(values)
-#
-#         # Sort array in crescent order
-#         sorted_h = sorted(h_array, key=lambda h_val: h_val[0])
-#
-#         # Select patterns using index from computed H value
-#         for i in range(0, n_features):
-#             # Get index from sorted H array
-#             index = sorted_h[i][1]
-#
-#             # Use index value to get the pattern from data matrix and label from labels array
-#             pattern = t_data[index].tolist()
-#             label = labels[index]
-#
-#             # Add values to new arrays
-#             new_data.append(pattern)
-#             new_labels.append(label)
-#
-#         # Update dataset replacing the old data and labels
-#         data["data"] = np.transpose(np.array(new_data))
-#         data["label"] = new_labels
-#     return data
+
+def run_pca(data, n_features):
+    # PCA application
+    pca = PCA(n_components=n_features)
+    new_data = pca.fit_transform(data["data"])
+    data["data"] = new_data
+    return data
