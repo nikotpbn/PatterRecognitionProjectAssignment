@@ -22,6 +22,7 @@ class Dataset:
         self.scenario_selected_int = None
         self.feature_selection_method_str = None
         self.feature_selection_method_int = None
+        self.features_excluded_by_feature_reduction = None
         self.dataset = {
             "data": {},
             "target": {},
@@ -106,20 +107,33 @@ class Dataset:
 
         return self
 
+    # Apply pre-processing in order of the scenario chosen:
+    # Scenario A: distinguish the "Jogging" activity (Class B) from the others activities (A and C - S)
+    # Scenario B: divide the hole dataset into 3 different classes, Non-hand-oriented activities (walking - A, jogging
+    #   - B, stairs - C, standing - E, kicking - M), General Hand-oriented activities (dribbling - P, playing catch - O,
+    #   typing - F, writing - Q, clapping - R, brushing teeth - G, folding clothes - S), Eating Hand-oriented activities
+    #   (eating pasta - J, eating soup - H, eating sandwich - L, eating chips - I, drinking - K) and delete the class
+    #   Sitting - D
+    # Scenario C: distinguish all the 18 activities
     def scenario_pre_processing(self, scenario):
         # Set attributes
         self.scenario_selected_int = scenario
-        # Scenario
+        # Scenarios
+        # Scenario A
         if scenario == 1:
             self.scenario_selected_str = "Scenario A"
+            # Keep the Jogging activity (B) as B class and change all other activities for class A
             for i in range(0, len(self.dataset["data"])):
                 if self.dataset["target"][i] != "B":
                     self.dataset["target"][i] = "A"
+        # Scenario B
         if scenario == 2:
             self.scenario_selected_str = "Scenario B"
             class_non_hand_oriented = ["A", "B", "C", "E", "M"]
             class_general_hand_oriented = ["P", "O", "F", "Q", "R", "G", "S"]
             class_eating_hand_oriented = ["J", "H", "L", "I", "K"]
+            class_for_delete = []
+            # Divide 17 of 18 class's into 3 big "class's" and then exclude the last one from the data and target
             for i in range(0, len(self.dataset["data"])):
                 if self.dataset["target"][i] in class_non_hand_oriented:
                     self.dataset["target"][i] = "A"
@@ -127,12 +141,25 @@ class Dataset:
                     self.dataset["target"][i] = "B"
                 if self.dataset["target"][i] in class_eating_hand_oriented:
                     self.dataset["target"][i] = "C"
+                if self.dataset["target"][i] == "D":
+                    class_for_delete.append(i)
+            # Delete the class Sitting (D) from the data and target
+            self.dataset["data"] = np.delete(self.dataset["data"], class_for_delete, axis=0)
+            self.dataset["target"] = np.delete(self.dataset["target"], class_for_delete, axis=0)
+            print(self.dataset["target"])
+        # Scenario C - Don't need to do anything, because the data already divide correctly
         if scenario == 3:
             self.scenario_selected_str = "Scenario C"
 
+    # This method just set the feature selection method chosen to be used
     def set_feature_selection_method(self, feature_selection_method):
         self.feature_selection_method_int = feature_selection_method
+        # K-bests method
         if feature_selection_method == 1:
             self.feature_selection_method_str = "K-bests"
+        # Kruskal-Wallis method
         if feature_selection_method == 2:
             self.feature_selection_method_str = "Kruskal-Wallis"
+
+    def set_features_excluded_by_feature_reduction(self, features_excluded):
+        self.features_excluded_by_feature_reduction = features_excluded

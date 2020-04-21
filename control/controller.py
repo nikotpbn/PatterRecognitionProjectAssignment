@@ -1,6 +1,7 @@
 # Imports
 # General
 from model.dataset import Dataset
+from model.rp_methods import kbest, kruskal_wallis, feature_reduction
 # Views
 from view.data_import import DataImport as ViewDataImport
 from view.feature_selection_and_reduction import FeatureSelectionAndReduction as ViewFeatureSelectionAndReduction
@@ -45,21 +46,41 @@ class Controller:
     # Apply the chosen feature selection. Create the third screen: screen to decide to use or not use PCA
     def feature_selection_and_reduction(self, feature_selection_method, number_feature):
         # Data processing
-        # Set the chosen feature selection method and the number of features to be used.
+        # Set the chosen feature selection method to be used.
         self.data.set_feature_selection_method(feature_selection_method)
-        # This has to be deleted, it is here just to see where you can find the values
-        print(self.data.feature_selection_method_str)
-        print(self.data.feature_selection_method_int)
-        print(number_feature)
-        # feature selection and reduction
+        # feature selection
+        # self.data.dataset = feature_selection(self.data.dataset, feature_selection_method, number_feature)
+        # K-best method
+        if feature_selection_method == 1:
+            self.data.dataset = kbest(self.data.dataset, number_feature)
+        # Kruskal_Wallis method
+        if feature_selection_method == 2:
+            self.data.dataset = kruskal_wallis(self.data.dataset, number_feature)
+        # feature reduction method
+        self.data.dataset, features_excluded = feature_reduction(self.data.dataset)
+        self.data.set_features_excluded_by_feature_reduction(features_excluded)
 
         # Screens processing
         # Destroy feature_selection_view
         self.feature_selection_view.dismiss()
-        # Create the new screen: feature_selection_view
+        # Create the new screen: pca_utilization_view
         self.pca_utilization_view = ViewPCAUtilization()
-        self.pca_utilization_view.show(self)
+        self.pca_utilization_view.show(self, number_feature)
 
+    def run_pca_analisys(self):
+        # Data processing
+        # ----
+
+        # Screens processing
+        # Destroy pca_utilization_view
+        self.feature_selection_view.dismiss()
+        # Create the new screen: ????
+
+    def run_pca(self):
+        pass
+
+    def classifiers(self):
+        pass
 
 
 # Run Program

@@ -36,7 +36,8 @@ class FeatureSelectionAndReduction:
         opt_feature_selection = IntVar()
         feature_selection_frame = LabelFrame(
             self.feature_selection_screen,
-            text="   Choose the selection method   ")
+            text="   Choose the selection method   ",
+            labelanchor='n')
         feature_selection_frame.pack(pady=15)
         rb_feature_selection1 = Radiobutton(
             feature_selection_frame,
@@ -55,7 +56,8 @@ class FeatureSelectionAndReduction:
         # Numbers of features to be used
         feature_reduction_frame = LabelFrame(
             self.feature_selection_screen,
-            text="   Select the number of features to be used   ")
+            text="   Select the number of features to be used   ",
+            labelanchor='n')
         feature_reduction_frame.pack(pady=15)
         number_feature = Scale(
             feature_reduction_frame,
