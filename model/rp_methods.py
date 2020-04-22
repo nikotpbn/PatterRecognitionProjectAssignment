@@ -3,7 +3,6 @@ import numpy as np
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
 from sklearn.decomposition import PCA
-from sklearn.model_selection import KFold
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.metrics import confusion_matrix
 from scipy import stats
@@ -117,3 +116,113 @@ def run_pca(data, n_features):
     new_data = pca.fit_transform(data["data"])
     data["data"] = new_data
     return data
+
+
+# Minimum distance classifier (MDC)
+# TODO: I think this method are take in consideration only the first scenario, need to be changed for the scenario A, B
+#  and C
+def minimum_distance_classifier(x_train, y_train, x_test, y_test):
+    # Transpose x_train and y_train to feature x readings
+    train_x = np.transpose(x_train)
+    test_x = np.transpose(x_test)
+
+    # Get indexes of the classes
+    ix_w1 = np.nonzero(np.in1d(y_train, 'A'))
+    ix_w2 = np.nonzero(np.in1d(y_train, 'B'))
+
+    # Calculate the mean of features for each pattern
+    mu1 = np.mean(train_x[:, ix_w1], 2)
+    mu2 = np.mean(train_x[:, ix_w2], 2)
+
+    # Array to hold prediction
+    predict = []
+
+    # Iterate through test data
+    for k in range(0, len(test_x[1])):
+        # 1st part of euclidian general formula
+        test_sample = np.transpose(np.array([test_x[:, k]]))
+        g1 = mu1.transpose().dot(test_sample)
+        g2 = mu2.transpose().dot(test_sample)
+
+        # 2nd part of euclidian general formula
+        mu1sqr = np.dot(0.5, mu1.transpose().dot(mu1))
+        mu2sqr = np.dot(0.5, mu2.transpose().dot(mu2))
+
+        g1 -= mu1sqr
+        g2 -= mu2sqr
+
+        if g1 >= g2:
+            predict.append('A')
+            # print("For k=", k, ".Prediction was A")
+        else:
+            predict.append('B')
+            # print("For k=",  k, ".Prediction was B")
+
+    cm = confusion_matrix(y_test, predict)
+
+    return cm
+
+
+# Fisher Discriminant Analisys (Fisher LDA)
+def fisher_discriminant_analisys(x_train, y_train, x_test, y_test):
+    # Classifier training
+    lda = LinearDiscriminantAnalysis().fit(x_train, y_train)
+
+    # Classifier test
+    predict = lda.predict(x_test)
+
+    # Prepare the confusion matrix
+    cm = confusion_matrix(y_test, predict)
+
+    return cm
+
+
+# TODO: Bayes Classifier
+def bayes_classifier():
+    pass
+
+
+# TODO: K-Nearest Neighbors (KNN)
+def k_nearest_neighbors():
+    pass
+
+
+# TODO: Support Vector Machines
+def support_vector_machines():
+    pass
+
+
+# Method to calculate the error of the classifier
+def cm_derivations_calculation(cm, cm_derivations):
+    # Error calculation
+    false_positive = round(sum(cm.sum(axis=0) - np.diag(cm)) / len(cm.sum(axis=0) - np.diag(cm)))
+    false_negative = round(sum(cm.sum(axis=1) - np.diag(cm)) / len(cm.sum(axis=1) - np.diag(cm)))
+    true_positive = round(sum(np.diag(cm)) / len(np.diag(cm)))
+    true_negative = cm.sum() - (false_positive + false_negative + true_positive)
+
+    # Dictionary update
+    cm_derivations["FP"] = false_positive
+    cm_derivations["FN"] = false_negative
+    cm_derivations["TP"] = true_positive
+    cm_derivations["TN"] = true_negative
+
+    return cm_derivations
+
+
+# Method to calculate the misclassification error
+def misclassification(cm_derivations):
+    numerator = cm_derivations["FP"] + cm_derivations["FN"]
+    denominator = cm_derivations["TP"] + cm_derivations["TN"] + cm_derivations["FP"] + cm_derivations["FN"]
+    return numerator / denominator
+
+
+# Method to calculate the sensitivity
+# TODO: Correct the formula
+def sensitivity(cm_derivations):
+    return cm_derivations["FP"] / (cm_derivations["TP"] + cm_derivations["FN"])
+
+
+# Method to calculate the specificity
+# TODO: Correct the formula
+def specificity(cm_derivations):
+    return cm_derivations["FP"] / (cm_derivations["FP"] + cm_derivations["TN"])
