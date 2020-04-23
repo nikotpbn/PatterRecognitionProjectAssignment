@@ -39,15 +39,20 @@ class Result:
             sensitivity = "True positive ratio Fisher LDA: " + "{0:.2}".format(cm_derivations["sensitivity"])
             specificity = "False positive ratio Fisher LDA: " + "{0:.2}".format(cm_derivations["specificity"])
         elif classifier == 3:
-            classifier_label = "These are the results found by the\n classifier K neared neighbors (KNN)"
+            classifier_label = "These are the results found by the\n classifier K nearest neighbors (KNN)"
             mean_error = "Mean of errors KNN: " + "{0:.2%}".format(cm_derivations["misclassification"])
             sensitivity = "True positive ratio KNN: " + "{0:.2}".format(cm_derivations["sensitivity"])
             specificity = "False positive ratio KNN: " + "{0:.2}".format(cm_derivations["specificity"])
+        elif classifier == 4:
+            classifier_label = "These are the results found by the\n classifier Naive-Bayes"
+            mean_error = "Mean of errors Naive-Bayes: " + "{0:.2%}".format(cm_derivations["misclassification"])
+            sensitivity = "True positive ratio Naive-Bayes: " + "{0:.2}".format(cm_derivations["sensitivity"])
+            specificity = "False positive ratio Naive-Bayes: " + "{0:.2}".format(cm_derivations["specificity"])
         elif classifier == 5:
-            classifier_label = "These are the results found by the\n classifier K neared neighbors (KNN)"
-            mean_error = "Mean of errors KNN: " + "{0:.2%}".format(cm_derivations["misclassification"])
-            sensitivity = "True positive ratio KNN: " + "{0:.2}".format(cm_derivations["sensitivity"])
-            specificity = "False positive ratio KNN: " + "{0:.2}".format(cm_derivations["specificity"])
+            classifier_label = "These are the results found by the\n classifier Support Vector Machine (SVM)"
+            mean_error = "Mean of errors SVM: " + "{0:.2%}".format(cm_derivations["misclassification"])
+            sensitivity = "True positive ratio SVM: " + "{0:.2}".format(cm_derivations["sensitivity"])
+            specificity = "False positive ratio SVM: " + "{0:.2}".format(cm_derivations["specificity"])
 
         # Information Add
         label1 = Label(self.screen_result, text=classifier_label, font=20)

@@ -4,6 +4,7 @@ from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
 from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import confusion_matrix
 from sklearn import neighbors, svm
 from scipy import stats
@@ -178,9 +179,12 @@ def fisher_discriminant_analisys(x_train, y_train, x_test, y_test):
     return cm
 
 
-# TODO: Bayes Classifier
-def bayes_classifier():
-    pass
+def bayes_classifier(x_train, y_train, x_test, y_test):
+    gnb = GaussianNB()
+    predict = gnb.fit(x_train, y_train).predict(x_test)
+    cm = confusion_matrix(y_test, predict)
+
+    return cm
 
 
 def k_nearest_neighbors(x_train, y_train, x_test, y_test, constant):

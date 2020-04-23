@@ -161,7 +161,7 @@ class Controller:
                     cm = k_nearest_neighbors(x_train, y_train, x_test, y_test, constant_value)
                 # Bayes Classifier
                 elif classifier == 4:
-                    cm = bayes_classifier()
+                    cm = bayes_classifier(x_train, y_train, x_test, y_test)
                 # Support Vector Machines
                 elif classifier == 5:
                     cm = support_vector_machines(x_train, y_train, x_test, y_test, constant_value)
