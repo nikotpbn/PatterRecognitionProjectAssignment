@@ -5,6 +5,7 @@ from sklearn.feature_selection import f_classif
 from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.metrics import confusion_matrix
+from sklearn import neighbors, svm
 from scipy import stats
 import matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -182,14 +183,30 @@ def bayes_classifier():
     pass
 
 
-# TODO: K-Nearest Neighbors (KNN)
-def k_nearest_neighbors():
-    pass
+def k_nearest_neighbors(x_train, y_train, x_test, y_test, constant):
+    constant = int(constant)
+    k = constant
+
+    for weights in ['uniform', 'distance']:
+        clf = neighbors.KNeighborsClassifier(k, weights=weights)
+
+        clf.fit(x_train, y_train)
+        predict = clf.predict(x_test)
+
+    cm = confusion_matrix(y_test, predict)
+
+    return cm
 
 
-# TODO: Support Vector Machines
-def support_vector_machines():
-    pass
+def support_vector_machines(x_train, y_train, x_test, y_test, constant):
+    c = float(constant)
+    clf = svm.SVC(kernel='linear', C=c)
+    clf.fit(x_train, y_train)
+
+    predict = clf.predict(x_test)
+    cm = confusion_matrix(y_test, predict)
+
+    return cm
 
 
 # Method to calculate the error of the classifier
@@ -217,12 +234,10 @@ def misclassification(cm_derivations):
 
 
 # Method to calculate the sensitivity
-# TODO: Correct the formula
 def sensitivity(cm_derivations):
-    return cm_derivations["FP"] / (cm_derivations["TP"] + cm_derivations["FN"])
+    return cm_derivations["TP"] / (cm_derivations["TP"] + cm_derivations["FN"])
 
 
 # Method to calculate the specificity
-# TODO: Correct the formula
 def specificity(cm_derivations):
-    return cm_derivations["FP"] / (cm_derivations["FP"] + cm_derivations["TN"])
+    return cm_derivations["TN"] / (cm_derivations["FP"] + cm_derivations["TN"])

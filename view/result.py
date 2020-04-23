@@ -38,6 +38,16 @@ class Result:
             mean_error = "Mean of errors Fisher LDA: " + "{0:.2%}".format(cm_derivations["misclassification"])
             sensitivity = "True positive ratio Fisher LDA: " + "{0:.2}".format(cm_derivations["sensitivity"])
             specificity = "False positive ratio Fisher LDA: " + "{0:.2}".format(cm_derivations["specificity"])
+        elif classifier == 3:
+            classifier_label = "These are the results found by the\n classifier K neared neighbors (KNN)"
+            mean_error = "Mean of errors KNN: " + "{0:.2%}".format(cm_derivations["misclassification"])
+            sensitivity = "True positive ratio KNN: " + "{0:.2}".format(cm_derivations["sensitivity"])
+            specificity = "False positive ratio KNN: " + "{0:.2}".format(cm_derivations["specificity"])
+        elif classifier == 5:
+            classifier_label = "These are the results found by the\n classifier K neared neighbors (KNN)"
+            mean_error = "Mean of errors KNN: " + "{0:.2%}".format(cm_derivations["misclassification"])
+            sensitivity = "True positive ratio KNN: " + "{0:.2}".format(cm_derivations["sensitivity"])
+            specificity = "False positive ratio KNN: " + "{0:.2}".format(cm_derivations["specificity"])
 
         # Information Add
         label1 = Label(self.screen_result, text=classifier_label, font=20)

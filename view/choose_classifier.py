@@ -16,7 +16,7 @@ class ChooseClassifier:
         self.screen_choose_classifier = tk.Tk()
         self.screen_choose_classifier.title("RP Assignment: Classifier selection")
         self.screen_choose_classifier['bg'] = self.background_color
-        self.screen_choose_classifier.geometry("600x550")
+        self.screen_choose_classifier.geometry("750x550")
         self.screen_choose_classifier.tk_setPalette(
             background=self.background_color,
             foreground=self.text_color)

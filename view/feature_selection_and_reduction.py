@@ -52,6 +52,7 @@ class FeatureSelectionAndReduction:
             value=2,
             text="Kruskal-Wallis",
             selectcolor=self.background_color)
+        rb_feature_selection2.select()
         rb_feature_selection2.pack()
         # Numbers of features to be used
         feature_reduction_frame = LabelFrame(
@@ -67,6 +68,7 @@ class FeatureSelectionAndReduction:
             sliderlength=15,
             length=400,
             tickinterval=10)
+        number_feature.set(91)
         number_feature.pack()
         # Execute button
         button1 = Button(self.feature_selection_screen,
