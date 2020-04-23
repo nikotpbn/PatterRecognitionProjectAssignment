@@ -139,7 +139,7 @@ class Screens(object):
         third_screen.geometry("1000x700")
         third_screen.tk_setPalette(background=self.darkBg, foreground=self.grey)
         second_screen.destroy()
-        # PCA analisys
+        # PCA anaisys
         explained_variance_, x_values, singular_values_ = rp.pca_analisys(self.data)
         # Information Add
         label1 = Label(third_screen, text="Result of PCA Analisys", font=20)
@@ -190,7 +190,7 @@ class Screens(object):
         classifierFrame = LabelFrame(fourth_screen, text="   Select the classifier to be used   ")
         classifierFrame.pack(pady=15)
         opt_classifier = IntVar()
-        RBClassifier1 = Radiobutton(classifierFrame, variable=opt_classifier, value=1, text="Minimum distance classifier (MDC)", selectcolor=self.darkBg)
+        RBClassifier1 = Radiobutton(classifierFrame, variable=opt_classifier, value=3, text="KNN", selectcolor=self.darkBg)
         RBClassifier1.pack()
         RBClassifier2 = Radiobutton(classifierFrame, variable=opt_classifier, value=2, text="Fisher Discriminant Analisys (Fisher LDA)", selectcolor=self.darkBg)
         RBClassifier2.pack()
@@ -223,11 +223,11 @@ class Screens(object):
         mean_error = ""
         true_pr = ""
         flase_pr = ""
-        if classifer == 1:
-            classifier_label = "These are the results found by the\n classifier Minimum Distance Classifier (MDC)"
-            mean_error = "Mean of errors for MDC: " + "{0:.2%}".format(classification_result["Misclassification"])
-            true_pr = "True positive ratio for MDC: " + "{0:.2}".format(classification_result["Sensitivity"])
-            flase_pr = "False positive ratio for MDC: " + "{0:.2}".format(classification_result["Specificity"])
+        if classifer == 3:
+            classifier_label = "These are the results found by the\n classifier KNN"
+            mean_error = "Mean of errors for KNN: " + "{0:.2%}".format(classification_result["Misclassification"])
+            true_pr = "True positive ratio for KNN: " + "{0:.2}".format(classification_result["Sensitivity"])
+            flase_pr = "False positive ratio for KNN: " + "{0:.2}".format(classification_result["Specificity"])
         elif classifer == 2:
             classifier_label = "These are the results found by the\n classifier Fisher Discriminant Analisys (Fisher LDA)"
             mean_error = "Mean of errors Fisher LDA: " + "{0:.2%}".format(classification_result["Misclassification"])

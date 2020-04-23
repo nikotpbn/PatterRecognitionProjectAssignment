@@ -8,6 +8,7 @@ from sklearn.decomposition import PCA
 from sklearn.model_selection import KFold
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.metrics import confusion_matrix
+from sklearn import neighbors
 from scipy import stats
 import matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -203,6 +204,19 @@ def classifier(data, classifier_opt, n_runs, n_subsets):
                 # Classifier test
                 predict = lda.predict(x_test)
                 cm = confusion_matrix(y_test, predict)
+
+            # -------------------- K Nearest Neighbors --------------------
+            if classifier_opt == 3:
+                k = 15
+
+                for weights in ['uniform', 'distance']:
+                    clf = neighbors.KNeighborsClassifier(k, weights=weights)
+
+                    clf.fit(x_train, y_train)
+                    predict = clf.predict(x_test)
+
+                cm = confusion_matrix(y_test, predict)
+
 
             # Results
             fp = round(sum(cm.sum(axis=0) - np.diag(cm)) / len(cm.sum(axis=0) - np.diag(cm)))
