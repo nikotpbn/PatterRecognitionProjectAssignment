@@ -1,16 +1,15 @@
 # Imports
-import numpy as np
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
-from sklearn.decomposition import PCA
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import confusion_matrix
+from sklearn.naive_bayes import GaussianNB
+from sklearn.decomposition import PCA
 from sklearn import neighbors, svm
 from scipy import stats
+import numpy as np
 import matplotlib
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.figure import Figure
+
 matplotlib.use("TkAgg")
 
 
@@ -25,6 +24,7 @@ def kbest(data, n_features):
     data["data"] = new_data
     data["label"] = new_label
     return data
+
 
 def kruskal_wallis(data, n_features):
     # Get information from the dataset
@@ -102,7 +102,7 @@ def feature_reduction(data):
     return data, redundant_features_label
 
 
-def pca_analisys(data):
+def pca_analysis(data):
     # PCA for reduction analysis
     pca = PCA()
     pca.fit(data["data"])
@@ -123,7 +123,9 @@ def run_pca(data, n_features):
 # Minimum distance classifier (MDC)
 # TODO: I think this method are take in consideration only the first scenario, need to be changed for the scenario A, B
 #  and C
-def minimum_distance_classifier(x_train, y_train, x_test, y_test):
+def minimum_distance_classifier(x_train, y_train, x_test, y_test, scenario):
+    # Scenario can be 1,2 or 3 (A, B or C)
+
     # Transpose x_train and y_train to feature x readings
     train_x = np.transpose(x_train)
     test_x = np.transpose(x_test)
@@ -173,41 +175,54 @@ def fisher_discriminant_analisys(x_train, y_train, x_test, y_test):
     # Classifier test
     predict = lda.predict(x_test)
 
-    # Prepare the confusion matrix
+    # Prepare confusion matrix
     cm = confusion_matrix(y_test, predict)
 
     return cm
 
 
 def bayes_classifier(x_train, y_train, x_test, y_test):
+    # Create object
     gnb = GaussianNB()
+
+    # Training and Classification
     predict = gnb.fit(x_train, y_train).predict(x_test)
+
+    # Prepare confusion matrix
     cm = confusion_matrix(y_test, predict)
 
     return cm
 
 
 def k_nearest_neighbors(x_train, y_train, x_test, y_test, constant):
-    constant = int(constant)
-    k = constant
+    # K Constant of KNN classifier
+    k = int(constant)
 
+    # Training and classification
     for weights in ['uniform', 'distance']:
         clf = neighbors.KNeighborsClassifier(k, weights=weights)
 
         clf.fit(x_train, y_train)
         predict = clf.predict(x_test)
 
+    # Prepare confusion matrix
     cm = confusion_matrix(y_test, predict)
 
     return cm
 
 
 def support_vector_machines(x_train, y_train, x_test, y_test, constant):
+    # C Constant of SVM classifier
     c = float(constant)
+
+    # Training
     clf = svm.SVC(kernel='linear', C=c)
     clf.fit(x_train, y_train)
 
+    # Classification
     predict = clf.predict(x_test)
+
+    # Prepare confusion matrix
     cm = confusion_matrix(y_test, predict)
 
     return cm

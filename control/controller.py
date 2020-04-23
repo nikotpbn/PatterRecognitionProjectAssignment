@@ -1,7 +1,7 @@
 # Imports
 # Own methods
 from model.dataset import Dataset
-from model.rp_methods import kbest, kruskal_wallis, feature_reduction, pca_analisys, run_pca, \
+from model.rp_methods import kbest, kruskal_wallis, feature_reduction, pca_analysis, run_pca, \
     minimum_distance_classifier, fisher_discriminant_analisys, bayes_classifier, k_nearest_neighbors, \
     support_vector_machines, cm_derivations_calculation, misclassification, sensitivity, specificity
 # Views
@@ -23,6 +23,7 @@ class Controller:
         # Attributes
         # General
         self.data = Dataset()
+        self.scenario = None
         # Views
         self.data_import_view = None
         self.feature_selection_view = None
@@ -45,7 +46,8 @@ class Controller:
         # Data processing
         # Set the chosen database and scenario attribute, and select the right dataset to be used in the project.
         self.data.choose_data(database)
-        # Data scenario pre-processing
+        # Data scenario pre-processing and controller variable assignment
+        self.scenario = scenario
         self.data.scenario_pre_processing(scenario)
 
         # Screens processing
@@ -83,7 +85,7 @@ class Controller:
     def run_pca_analisys(self):
         # Data processing
         # Run the PCA analisys
-        explained_variance_, x_values, singular_values_ = pca_analisys(self.data.dataset)
+        explained_variance_, x_values, singular_values_ = pca_analysis(self.data.dataset)
 
         # Screens processing
         # Destroy pca_utilization_view
@@ -152,7 +154,7 @@ class Controller:
                 # Check the classifier chosen to call the right method
                 # Minimum distance classifier (MDC)
                 if classifier == 1:
-                    cm = minimum_distance_classifier(x_train, y_train, x_test, y_test)
+                    cm = minimum_distance_classifier(x_train, y_train, x_test, y_test, self.scenario)
                 # Fisher Discriminant Analisys (Fisher LDA)
                 elif classifier == 2:
                     cm = fisher_discriminant_analisys(x_train, y_train, x_test, y_test)
