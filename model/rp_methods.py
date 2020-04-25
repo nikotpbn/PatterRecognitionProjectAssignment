@@ -121,46 +121,41 @@ def run_pca(data, n_features):
 
 
 # Minimum distance classifier (MDC)
-# TODO: I think this method are take in consideration only the first scenario, need to be changed for the scenario A, B
-#  and C
-def minimum_distance_classifier(x_train, y_train, x_test, y_test, scenario):
-    # Scenario can be 1,2 or 3 (A, B or C)
+def minimum_distance_classifier(x_train, y_train, x_test, y_test):
+    # Variables to hold prediction and mean values of features
+    predict = []
+    means = []
 
     # Transpose x_train and y_train to feature x readings
     train_x = np.transpose(x_train)
     test_x = np.transpose(x_test)
 
-    # Get indexes of the classes
-    ix_w1 = np.nonzero(np.in1d(y_train, 'A'))
-    ix_w2 = np.nonzero(np.in1d(y_train, 'B'))
+    # Get labels dynamically for scenario A, B and C
+    activity_labels = np.unique(y_train)
 
-    # Calculate the mean of features for each pattern
-    mu1 = np.mean(train_x[:, ix_w1], 2)
-    mu2 = np.mean(train_x[:, ix_w2], 2)
-
-    # Array to hold prediction
-    predict = []
+    # Calculate means for each feature
+    for i in range(0, len(activity_labels)):
+        indexes = np.nonzero(np.in1d(y_train, activity_labels[i]))
+        means.append(np.mean(train_x[:, indexes], 2))
 
     # Iterate through test data
     for k in range(0, len(test_x[1])):
-        # 1st part of euclidian general formula
+        # Variable to hold Euclidian distance general formula values
+        g_value = []
+
+        # Get the sample to classify
         test_sample = np.transpose(np.array([test_x[:, k]]))
-        g1 = mu1.transpose().dot(test_sample)
-        g2 = mu2.transpose().dot(test_sample)
 
-        # 2nd part of euclidian general formula
-        mu1sqr = np.dot(0.5, mu1.transpose().dot(mu1))
-        mu2sqr = np.dot(0.5, mu2.transpose().dot(mu2))
+        # Apply Euclidian general formula
+        for i in range(0, len(activity_labels)):
+            g_value.append(np.subtract(means[i].transpose().dot(test_sample),
+                                       np.dot(0.5, means[i].transpose().dot(means[i]))))
 
-        g1 -= mu1sqr
-        g2 -= mu2sqr
+        # Index of the maximum value out of g_value vector
+        max_index = g_value.index(max(g_value))
 
-        if g1 >= g2:
-            predict.append('A')
-            # print("For k=", k, ".Prediction was A")
-        else:
-            predict.append('B')
-            # print("For k=",  k, ".Prediction was B")
+        # Use the index to add label to prediction array
+        predict.append(activity_labels[max_index])
 
     cm = confusion_matrix(y_test, predict)
 

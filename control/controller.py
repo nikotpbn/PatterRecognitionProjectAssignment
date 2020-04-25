@@ -23,7 +23,6 @@ class Controller:
         # Attributes
         # General
         self.data = Dataset()
-        self.scenario = None
         # Views
         self.data_import_view = None
         self.feature_selection_view = None
@@ -154,7 +153,7 @@ class Controller:
                 # Check the classifier chosen to call the right method
                 # Minimum distance classifier (MDC)
                 if classifier == 1:
-                    cm = minimum_distance_classifier(x_train, y_train, x_test, y_test, self.scenario)
+                    cm = minimum_distance_classifier(x_train, y_train, x_test, y_test)
                 # Fisher Discriminant Analisys (Fisher LDA)
                 elif classifier == 2:
                     cm = fisher_discriminant_analisys(x_train, y_train, x_test, y_test)
