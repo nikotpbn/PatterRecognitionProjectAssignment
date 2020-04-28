@@ -3,10 +3,9 @@ import tkinter as tk
 from tkinter import *
 
 
-# Class to show the result
+# Interface to show the result
 class Result:
-
-    # Construct method
+    # Constructor Method
     def __init__(self, *args, **kwargs):
         # Attributes
         self.background_color = "#212121"
@@ -24,17 +23,19 @@ class Result:
     # Method to create the screen design and display it
     def show(self, controller, classifier, cm_derivations):
         # String preparations
-        classifier_label = ""
         mean_error = ""
         sensitivity = ""
         specificity = ""
+        classifier_label = ""
+
         if classifier == 1:
             classifier_label = "These are the results found by the\n classifier Minimum Distance Classifier (MDC)"
             mean_error = "Mean of errors for MDC: " + "{0:.2%}".format(cm_derivations["misclassification"])
             sensitivity = "True positive ratio for MDC: " + "{0:.2}".format(cm_derivations["sensitivity"])
             specificity = "False positive ratio for MDC: " + "{0:.2}".format(cm_derivations["specificity"])
         elif classifier == 2:
-            classifier_label = "These are the results found by the\n classifier Fisher Discriminant Analisys (Fisher LDA)"
+            classifier_label = "These are the results found by the\n " \
+                               "classifier Fisher Discriminant Analisys (Fisher LDA)"
             mean_error = "Mean of errors Fisher LDA: " + "{0:.2%}".format(cm_derivations["misclassification"])
             sensitivity = "True positive ratio Fisher LDA: " + "{0:.2}".format(cm_derivations["sensitivity"])
             specificity = "False positive ratio Fisher LDA: " + "{0:.2}".format(cm_derivations["specificity"])
@@ -58,12 +59,15 @@ class Result:
         label1 = Label(self.screen_result, text=classifier_label, font=20)
         label1.config(anchor=CENTER)
         label1.pack(pady=15)
+
         label2 = Label(self.screen_result, text=mean_error, font=20)
         label2.config(anchor=CENTER)
         label2.pack(pady=15)
+
         label3 = Label(self.screen_result, text=sensitivity, font=20)
         label3.config(anchor=CENTER)
         label3.pack(pady=15)
+
         label4 = Label(self.screen_result, text=specificity, font=20)
         label4.config(anchor=CENTER)
         label4.pack(pady=15)

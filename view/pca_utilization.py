@@ -3,10 +3,9 @@ import tkinter as tk
 from tkinter import *
 
 
-# Class to decide to use or not use PCA
+# Interface to decide to use or not use PCA
 class PCAUtilization:
-
-    # Construct method
+    # Constructor Method
     def __init__(self, *args, **kwargs):
         # Attributes
         self.background_color = "#212121"
@@ -24,6 +23,7 @@ class PCAUtilization:
     # Method to create the screen design and display it
     def show(self, controller, number_feature):
         # Label to show the title in the screen_pca_utilization
+        # TODO: This text still need to be fixed.
         lb_title = Label(
             self.screen_pca_utilization,
             text="It was chosen the " + str(number_feature) + " (best) of 91 features with the feature\n selection method "
@@ -34,6 +34,7 @@ class PCAUtilization:
             font=13)
         lb_title.config(anchor=CENTER)
         lb_title.pack(pady=15)
+
         # Button to see the features maintained
         button1 = Button(
             self.screen_pca_utilization,
@@ -41,6 +42,7 @@ class PCAUtilization:
             command=lambda: self.show_features(controller))
         button1.config(height=1, width=50)
         button1.pack(pady=10)
+
         # Button to execute PCA
         button2 = Button(
             self.screen_pca_utilization,
@@ -48,6 +50,7 @@ class PCAUtilization:
             command=controller.run_pca_analisys)
         button2.config(height=3, width=50)
         button2.pack(pady=5)
+
         # Button to go to the classifiers
         button3 = Button(
             self.screen_pca_utilization,

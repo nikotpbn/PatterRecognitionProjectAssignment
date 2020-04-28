@@ -1,15 +1,14 @@
 # Imports
+import numpy as np
 import tkinter as tk
 from tkinter import *
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
-import numpy as np
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
-# Class to show the PCA graphics, and decide how many features must be maintained
+# Interface to show the PCA graphics, and decide how many features must be maintained
 class PCAGraphics:
-
-    # Construct method
+    # Constructor Method
     def __init__(self, *args, **kwargs):
         # Attributes
         self.background_color = "#212121"
@@ -33,6 +32,7 @@ class PCAGraphics:
             font=20)
         label1.config(anchor=CENTER)
         label1.grid(row=0, column=0, columnspan=2, pady=15)
+
         # Create the graphics (Eigenvalues x Principal Components) and plot it into the screen
         figure1 = plt.Figure(figsize=(6, 4), dpi=75)
         ax1 = figure1.add_subplot(111)
@@ -42,6 +42,7 @@ class PCAGraphics:
         ax1.set_ylabel('Eigenvalues')
         scatter1 = FigureCanvasTkAgg(figure1, self.screen_pca_graphics)
         scatter1.get_tk_widget().grid(row=1, column=0, padx=(15, 0), pady=(10, 0))
+
         # Create the graphics (Eigenvalues x Principal Components) and plot it into the screen
         figure2 = plt.Figure(figsize=(6, 4), dpi=75)
         ax2 = figure2.add_subplot(111)
@@ -51,6 +52,7 @@ class PCAGraphics:
         ax2.set_ylabel('Percentage of variance')
         scatter2 = FigureCanvasTkAgg(figure2, self.screen_pca_graphics)
         scatter2.get_tk_widget().grid(row=1, column=1, padx=(15, 0), pady=(10, 0))
+
         # Feature Selection Options
         pca_frame = LabelFrame(
             self.screen_pca_graphics,
@@ -66,13 +68,13 @@ class PCAGraphics:
             length=400,
             tickinterval=5)
         scale1.pack()
+
         # Button to execute PCA
         button1 = Button(
             self.screen_pca_graphics,
             text="Run PCA",
-        command=lambda: controller.choose_classifier(
-            scale1.get()
-        ))
+            command=lambda: controller.choose_classifier(scale1.get())
+        )
         button1.config(height=3, width=50)
         button1.grid(row=3, column=0, columnspan=2, pady=15)
 

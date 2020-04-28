@@ -3,10 +3,9 @@ import tkinter as tk
 from tkinter import *
 
 
-# Class to select the configurations of the feature selection
-class FeatureSelectionAndReduction:
-
-    # Construct method
+# Interface for...
+class FeatureSelection:
+    # Constructor Method
     def __init__(self, *args, **kwargs):
         # Attributes
         self.background_color = "#212121"
@@ -39,6 +38,7 @@ class FeatureSelectionAndReduction:
             text="   Choose the selection method   ",
             labelanchor='n')
         feature_selection_frame.pack(pady=15)
+
         rb_feature_selection1 = Radiobutton(
             feature_selection_frame,
             variable=opt_feature_selection,
@@ -46,6 +46,7 @@ class FeatureSelectionAndReduction:
             text="K-bests",
             selectcolor=self.background_color)
         rb_feature_selection1.pack()
+
         rb_feature_selection2 = Radiobutton(
             feature_selection_frame,
             variable=opt_feature_selection,
@@ -54,12 +55,14 @@ class FeatureSelectionAndReduction:
             selectcolor=self.background_color)
         rb_feature_selection2.select()
         rb_feature_selection2.pack()
+
         # Numbers of features to be used
         feature_reduction_frame = LabelFrame(
             self.feature_selection_screen,
             text="   Select the number of features to be used   ",
             labelanchor='n')
         feature_reduction_frame.pack(pady=15)
+
         number_feature = Scale(
             feature_reduction_frame,
             from_=2,
@@ -70,6 +73,7 @@ class FeatureSelectionAndReduction:
             tickinterval=10)
         number_feature.set(91)
         number_feature.pack()
+
         # Execute button
         button1 = Button(self.feature_selection_screen,
                          text="Run Feature Selection and Feature Reduction",

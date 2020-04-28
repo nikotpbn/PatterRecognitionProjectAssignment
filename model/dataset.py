@@ -1,21 +1,21 @@
 # Imports
+import re
 import glob
 import pathlib
-import re
 import numpy as np
 
 
-# Class to work into the database
+# Class to read database files into an Object
 class Dataset:
-    # Initialization
+    # Constructor Method
     def __init__(self):
-        # Attributes
-        # Inside
-        self.__phone_accel = None
+        # Private Variables
         self.__phone_gyro = None
-        self.__watch_accel = None
         self.__watch_gyro = None
-        # Outside
+        self.__phone_accel = None
+        self.__watch_accel = None
+
+        # Public Variables
         self.database_selected_str = None
         self.database_selected_int = None
         self.scenario_selected_str = None
@@ -23,71 +23,80 @@ class Dataset:
         self.feature_selection_method_str = None
         self.feature_selection_method_int = None
         self.features_excluded_by_feature_reduction = None
+
+        # Structure
         self.dataset = {
             "data": {},
-            "target": {},
-            "label": {}
+            "label": {},
+            "target": {}
         }
 
         # Path to the project file
         current_dir = pathlib.Path().absolute().parent
 
         # Paths to accelerometer and gyroscope dataset's
-        phone_accel_paths = "%s/wisdm-dataset/arff_files/phone/accel/*.arff" % current_dir
         phone_gyro_paths = "%s/wisdm-dataset/arff_files/phone/gyro/*.arff" % current_dir
-        watch_accel_paths = "%s/wisdm-dataset/arff_files/watch/accel/*.arff" % current_dir
         watch_gyro_paths = "%s/wisdm-dataset/arff_files/watch/gyro/*.arff" % current_dir
+        watch_accel_paths = "%s/wisdm-dataset/arff_files/watch/accel/*.arff" % current_dir
+        phone_accel_paths = "%s/wisdm-dataset/arff_files/phone/accel/*.arff" % current_dir
 
         # Load files
-        self.__phone_accel = glob.glob(phone_accel_paths)
         self.__phone_gyro = glob.glob(phone_gyro_paths)
-        self.__watch_accel = glob.glob(watch_accel_paths)
         self.__watch_gyro = glob.glob(watch_gyro_paths)
+        self.__phone_accel = glob.glob(phone_accel_paths)
+        self.__watch_accel = glob.glob(watch_accel_paths)
 
-    # Add the data into the attribute
+    # Private method to read data
     def __add_data(self, data_files, device, sensor):
-        # Variable
-        file_number = 1
+        # Variables
         data = []
-        target = []
         label = []
+        target = []
+        file_number = 1
 
-        # Read each data in vector data_files
+        # Read each file in vector data_files
         for data_file in data_files:
             file = open(data_file)
-            # Variable to control the lines in the file, to separate the sample to the label
+            # Variable to control the lines in the file, to separate the sample from the label
             line = 1
+
             # Read each line in each file
             for sample in file:
                 if 4 <= line <= 94 and file_number == 1:
                     # Search for labels of each attribute
                     found = re.search('"(.+?)"', sample).group(1)
                     label.append(found)
+
                 elif line > 97 and sample is not None:
                     # Work in each sample in the file
                     read = sample.split(",")
+
                     # Add the first value in the sample (activity) in the vector target
                     target.append(read[0])
-                    # Eliminate the target (activity - first value) and the subject (individual - last value) from the
-                    # sample
+
+                    # Eliminate the target (activity - first value)
+                    # And the subject (individual - last value) from the sample
                     read.pop(0)
                     read.pop(-1)
-                    # Add the vector read in the vector data
+
+                    # Add values to data array
                     data.append(read)
+
                 line += 1
+
             file_number += 1
 
-        # Add the data read into the dataset attribute
+        # Add data array into the structure
         self.dataset["data"] = np.asarray(data).astype(np.float64)
         self.dataset["target"] = np.asarray(target)
         self.dataset["label"] = np.asarray(label)
 
-    # Choose what dataset will be used
+    # Choose which dataset will be used
     def choose_data(self, data_load):
-        # Set attributes
+        # Save the selected database
         self.database_selected_int = data_load
 
-        # Database
+        # Load Dataset
         # Phone-accelerometer data
         if data_load == 1:
             self.database_selected_str = "Accelerometer from phone"
@@ -107,52 +116,65 @@ class Dataset:
 
         return self
 
-    # Apply pre-processing in order of the scenario chosen:
-    # Scenario A: distinguish the "Jogging" activity (Class B) from the others activities (A and C - S)
-    # Scenario B: divide the hole dataset into 3 different classes, Non-hand-oriented activities (walking - A, jogging
-    #   - B, stairs - C, standing - E, kicking - M), General Hand-oriented activities (dribbling - P, playing catch - O,
-    #   typing - F, writing - Q, clapping - R, brushing teeth - G, folding clothes - S), Eating Hand-oriented activities
-    #   (eating pasta - J, eating soup - H, eating sandwich - L, eating chips - I, drinking - K) and delete the class
-    #   Sitting - D
+    # Pre-process data in function of the scenario:
+    # Scenario A: distinguish the "Jogging" activity from the others activities
+
+    # Scenario B: divide the dataset into 3 different classes, Non-hand-oriented activities ,
+    #   General Hand-oriented activities, Eating Hand-oriented activities and (Delete the class
+    #   Sitting "D" which does not belong to any of the three classes)
+
     # Scenario C: distinguish all the 18 activities
     def scenario_pre_processing(self, scenario):
-        # Set attributes
+        # Save selected scenario
         self.scenario_selected_int = scenario
-        # Scenarios
-        # Scenario A
+
+        # Scenario A: Label jogging as "A" others as "B"
         if scenario == 1:
             self.scenario_selected_str = "Scenario A"
             # Keep the Jogging activity (B) as B class and change all other activities for class A
             for i in range(0, len(self.dataset["data"])):
                 if self.dataset["target"][i] != "B":
                     self.dataset["target"][i] = "A"
-        # Scenario B
+
+        # Scenario B: Label activities as A, B and C
         if scenario == 2:
+            # Save selected scenario
             self.scenario_selected_str = "Scenario B"
-            class_non_hand_oriented = ["A", "B", "C", "E", "M"]
-            class_general_hand_oriented = ["P", "O", "F", "Q", "R", "G", "S"]
-            class_eating_hand_oriented = ["J", "H", "L", "I", "K"]
+
+            # Separate classes
             class_for_delete = []
-            # Divide 17 of 18 class's into 3 big "class's" and then exclude the last one from the data and target
+            class_non_hand_oriented = ["A", "B", "C", "E", "M"]
+            class_eating_hand_oriented = ["J", "H", "L", "I", "K"]
+            class_general_hand_oriented = ["P", "O", "F", "Q", "R", "G", "S"]
+
+            # Label divided classes
             for i in range(0, len(self.dataset["data"])):
                 if self.dataset["target"][i] in class_non_hand_oriented:
                     self.dataset["target"][i] = "A"
+
                 if self.dataset["target"][i] in class_general_hand_oriented:
                     self.dataset["target"][i] = "B"
+
                 if self.dataset["target"][i] in class_eating_hand_oriented:
                     self.dataset["target"][i] = "C"
+
+                # Delete the class that does not belong to any other activity
                 if self.dataset["target"][i] == "D":
                     class_for_delete.append(i)
-            # Delete the class Sitting (D) from the data and target
+
+            # Deletion of readings and targets
             self.dataset["data"] = np.delete(self.dataset["data"], class_for_delete, axis=0)
             self.dataset["target"] = np.delete(self.dataset["target"], class_for_delete, axis=0)
-        # Scenario C - Don't need to do anything, because the data already divide correctly
+
+        # Scenario C - No changes on data, because it is already divided correctly
         if scenario == 3:
             self.scenario_selected_str = "Scenario C"
 
-    # This method just set the feature selection method chosen to be used
+    # Method to save feature selection method
     def set_feature_selection_method(self, feature_selection_method):
+        # Save feature selection method
         self.feature_selection_method_int = feature_selection_method
+
         # K-bests method
         if feature_selection_method == 1:
             self.feature_selection_method_str = "K-bests"
@@ -160,5 +182,6 @@ class Dataset:
         if feature_selection_method == 2:
             self.feature_selection_method_str = "Kruskal-Wallis"
 
+    # Save features excluded by redundancy measure
     def set_features_excluded_by_feature_reduction(self, features_excluded):
         self.features_excluded_by_feature_reduction = features_excluded

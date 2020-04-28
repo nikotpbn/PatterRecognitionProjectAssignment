@@ -1,41 +1,48 @@
 # Imports
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import f_classif
-from sklearn.metrics import confusion_matrix
-from sklearn.naive_bayes import GaussianNB
-from sklearn.decomposition import PCA
-from sklearn import neighbors, svm
-from scipy import stats
-import numpy as np
 import matplotlib
+import numpy as np
+from scipy import stats
+from sklearn import neighbors, svm
+from sklearn.decomposition import PCA
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import confusion_matrix
+from sklearn.feature_selection import f_classif
+from sklearn.feature_selection import SelectKBest
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 matplotlib.use("TkAgg")
 
 
+# Kbest method for feature selection
 def kbest(data, n_features):
     # Choosing the K-best features to be used
     selector = SelectKBest(f_classif, k=n_features)
     new_data = selector.fit_transform(data["data"], data["target"])
-    # Recover from the model the indexes that represent the features maintained, and keep them in the label vector
+
+    # Recover from the model the indexes that represent the features maintained
+    # and keep them in the label vector
     indexes = selector.get_support(indices=True)
     new_label = [data["label"][i] for i in indexes]
-    # Update dataset replacing the old data and label to the bests
+
+    # Update dataset replacing the old data and labels
     data["data"] = new_data
     data["label"] = new_label
+
     return data
 
 
+# Kruskal-Wallis method for feature selection
 def kruskal_wallis(data, n_features):
-    # Get information from the dataset
-    t_data = np.transpose(data["data"])
-    targets = data["target"]
-    labels = data["label"]
+    # Variables
     new_data = []
     new_labels = []
+    labels = data["label"]
+    targets = data["target"]
+    t_data = np.transpose(data["data"])
 
     # Array to hold H values and indexes from Kruskal-Wallis method
     h_array = []
+
     # Compute H value for each pattern
     for i in range(0, len(t_data)):
         k = stats.kruskal(t_data[i, :], targets)
@@ -64,17 +71,21 @@ def kruskal_wallis(data, n_features):
     # Update dataset replacing the old data and labels
     data["data"] = np.transpose(np.array(new_data))
     data["label"] = new_labels
+
     return data
 
 
-def feature_reduction(data):
+# Method for redundancy measure in order to eliminate correlated features
+def redundancy_measure(data):
     # Variables
     correlation_rate = 0.9
     maintained_features_idx = []
     redundant_features_idx = []
     redundant_features_label = []
+
     # Correlation matrix with numpy
     correlation_matrix = np.corrcoef(np.transpose(data["data"]))
+
     # Upper diagonal interaction of the matrix. If the correlation score are out of +-correlation_rate then the feature
     # in the line is maintained and the feature in the column is deleted.
     for i in range(0, len(correlation_matrix)):
@@ -87,6 +98,7 @@ def feature_reduction(data):
             else:
                 if i not in maintained_features_idx and i not in redundant_features_idx:
                     maintained_features_idx.append(i)
+
     # Exclude the features highly correlated from the matrix, fixes the label vector and prepare the redundant vector
     # with their respective labels
     new_data = np.transpose(data["data"])
@@ -102,21 +114,25 @@ def feature_reduction(data):
     return data, redundant_features_label
 
 
+# Method to run PCA feature analysis (plots)
 def pca_analysis(data):
     # PCA for reduction analysis
     pca = PCA()
     pca.fit(data["data"])
-    # Plots
-    # Preparations to plot
+
+    # Set up data to plot
     x_values = np.arange(1, len(data["label"]) + 1)
+
     return pca.explained_variance_, x_values, pca.singular_values_
 
 
+# Method to apply PCA feature reduction
 def run_pca(data, n_features):
     # PCA application
     pca = PCA(n_components=n_features)
     new_data = pca.fit_transform(data["data"])
     data["data"] = new_data
+
     return data
 
 
@@ -176,6 +192,7 @@ def fisher_discriminant_analisys(x_train, y_train, x_test, y_test):
     return cm
 
 
+# Naive-Bayes Classifier
 def bayes_classifier(x_train, y_train, x_test, y_test):
     # Create object
     gnb = GaussianNB()
@@ -189,6 +206,7 @@ def bayes_classifier(x_train, y_train, x_test, y_test):
     return cm
 
 
+# KNN Classifier
 def k_nearest_neighbors(x_train, y_train, x_test, y_test, constant):
     # K Constant of KNN classifier
     k = int(constant)
@@ -206,6 +224,7 @@ def k_nearest_neighbors(x_train, y_train, x_test, y_test, constant):
     return cm
 
 
+# SVM Classifier
 def support_vector_machines(x_train, y_train, x_test, y_test, constant):
     # C Constant of SVM classifier
     c = float(constant)
@@ -244,14 +263,17 @@ def cm_derivations_calculation(cm, cm_derivations):
 def misclassification(cm_derivations):
     numerator = cm_derivations["FP"] + cm_derivations["FN"]
     denominator = cm_derivations["TP"] + cm_derivations["TN"] + cm_derivations["FP"] + cm_derivations["FN"]
+
     return numerator / denominator
 
 
 # Method to calculate the sensitivity
 def sensitivity(cm_derivations):
+
     return cm_derivations["TP"] / (cm_derivations["TP"] + cm_derivations["FN"])
 
 
 # Method to calculate the specificity
 def specificity(cm_derivations):
+
     return cm_derivations["TN"] / (cm_derivations["FP"] + cm_derivations["TN"])

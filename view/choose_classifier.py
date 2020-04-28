@@ -2,13 +2,11 @@
 import tkinter as tk
 from tkinter import *
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
-# Class to ...
+# Interface to...
 class ChooseClassifier:
-
-    # Construct method
+    # Constructor Method
     def __init__(self, *args, **kwargs):
         # Attributes
         self.background_color = "#212121"
@@ -45,6 +43,7 @@ class ChooseClassifier:
             font=20)
         label1.config(anchor=CENTER)
         label1.pack(pady=15)
+
         # Classifier Options
         opt_classifier = IntVar()
         classifier_frame = LabelFrame(
@@ -52,6 +51,7 @@ class ChooseClassifier:
             text="   Select the classifier   ",
             labelanchor='n')
         classifier_frame.pack(pady=15)
+
         rb_classifier4 = Radiobutton(
             classifier_frame,
             variable=opt_classifier,
@@ -60,6 +60,7 @@ class ChooseClassifier:
             selectcolor=self.background_color,
             command=self.other_classifier_selected)
         rb_classifier4.pack()
+
         rb_classifier5 = Radiobutton(
             classifier_frame,
             variable=opt_classifier,
@@ -68,6 +69,7 @@ class ChooseClassifier:
             selectcolor=self.background_color,
             command=lambda: self.knn_svm_selected(5))
         rb_classifier5.pack()
+
         rb_classifier3 = Radiobutton(
             classifier_frame,
             variable=opt_classifier,
@@ -76,6 +78,7 @@ class ChooseClassifier:
             selectcolor=self.background_color,
             command=lambda: self.knn_svm_selected(3))
         rb_classifier3.pack()
+
         rb_classifier1 = Radiobutton(
             classifier_frame,
             variable=opt_classifier,
@@ -84,6 +87,7 @@ class ChooseClassifier:
             selectcolor=self.background_color,
             command=self.other_classifier_selected)
         rb_classifier1.pack()
+
         rb_classifier2 = Radiobutton(
             classifier_frame,
             variable=opt_classifier,
@@ -92,24 +96,28 @@ class ChooseClassifier:
             selectcolor=self.background_color,
             command=self.other_classifier_selected)
         rb_classifier2.pack()
+
         # Classifier configurations
         classifier_config_frame = LabelFrame(
             self.screen_choose_classifier,
             text="   Select the configurations for the classifier   ",
             labelanchor='n')
         classifier_config_frame.pack(pady=15)
+
         label2 = Label(
             classifier_config_frame,
             text="Insert the number of runs:")
         label2.grid(row=0, column=0)
         n_runs = Entry(classifier_config_frame, width=30)
         n_runs.grid(row=0, column=1)
+
         label3 = Label(
             classifier_config_frame,
             text="Insert the number of subsets to be used in the K-fold cross-validation:     ")
         label3.grid(row=1, column=0)
         n_subsets = Entry(classifier_config_frame, width=30)
         n_subsets.grid(row=1, column=1)
+
         # Button to run the C-value or K-value test
         self.button1 = Button(
             self.screen_choose_classifier,
@@ -118,11 +126,12 @@ class ChooseClassifier:
                 controller,
                 opt_classifier.get()))
         self.button1.config(height=1, width=50)
+
         # Button to run the classifier
         self.button2 = Button(
             self.screen_choose_classifier,
             text="Get Result",
-            command=lambda: controller.apply_classifier(
+            command=lambda: controller.classify(
                 int(n_runs.get()),
                 int(n_subsets.get()),
                 opt_classifier.get(),
@@ -142,14 +151,18 @@ class ChooseClassifier:
         else:
             self.label_knn_svm.config(text='Insert the C-value: ')
             self.button1.config(text='Test C Values (Takes several minutes)')
+
         # Erase the run classifier button in order to organize the information in the screen in the right way
         self.button2.pack_forget()
+
         # Show the frame, label and entry for C-value or K-value
         self.knn_svm_constant_frame.pack(pady=15)
         self.label_knn_svm.grid(row=0, column=0)
         self.k_c_value.grid(row=0, column=1)
+
         # Show the button that presents the C-value or K-value test and graphic
         self.button1.pack(pady=5)
+
         # Show run classifier button again
         self.button2.pack(pady=5)
 
@@ -160,6 +173,7 @@ class ChooseClassifier:
         self.label_knn_svm.grid_forget()
         self.k_c_value.grid_forget()
         self.button1.pack_forget()
+
         # Reconfigure the run classifier button
         self.button2.config(pady=15)
 
@@ -187,26 +201,6 @@ class ChooseClassifier:
         # Plot
         plt.errorbar(x_axis, y_axis, error_bar, marker='^', capsize=3)
         plt.show()
-
-        # Window Definition to show the test graphic
-        # screen_show_k_c_value_graphic = tk.Tk()
-        # screen_show_k_c_value_graphic.title("RP Assignment: " + k_c_value_str + " Test")
-        # screen_show_k_c_value_graphic['bg'] = self.background_color
-        # screen_show_k_c_value_graphic.geometry("600x500")
-        # screen_show_k_c_value_graphic.tk_setPalette(
-        #     background=self.background_color,
-        #     foreground=self.text_color)
-
-        # # Title label
-        # label1 = Label(
-        #     screen_show_k_c_value_graphic,
-        #     text="See the graphic below to choose your " + k_c_value_str,
-        #     font=20)
-        # label1.config(anchor=CENTER)
-        # label1.pack(pady=15)
-
-        # Execute the screen
-        # screen_show_k_c_value_graphic.mainloop()
 
     # Method to destroy this screen
     def dismiss(self):
