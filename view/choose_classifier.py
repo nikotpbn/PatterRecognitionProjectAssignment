@@ -1,6 +1,8 @@
 # Imports
 import tkinter as tk
 from tkinter import *
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
 # Class to ...
@@ -136,10 +138,10 @@ class ChooseClassifier:
         # Test the classifier and set the right string to show
         if classifier == 3:
             self.label_knn_svm.config(text='Insert the K-value: ')
-            self.button1.config(text='Run the test to see the best K value')
+            self.button1.config(text='Test K Values (Takes a couple of minutes)')
         else:
             self.label_knn_svm.config(text='Insert the C-value: ')
-            self.button1.config(text='Run the test to see the best C value')
+            self.button1.config(text='Test C Values (Takes several minutes)')
         # Erase the run classifier button in order to organize the information in the screen in the right way
         self.button2.pack_forget()
         # Show the frame, label and entry for C-value or K-value
@@ -163,38 +165,48 @@ class ChooseClassifier:
 
     # Method to Execute the C-value or K-value test
     def discovery_k_or_c_value(self, controller, classifier):
+        # Plot error bar chart
+        plt.ylabel("Error %")
+
         # Prepare the C-value or K-value string
         if classifier == 3:
             k_c_value_str = "K-value"
+            plt.xlabel("K Value")
         else:
             k_c_value_str = "C-value"
-        # Window Definition to show the test graphic
-        screen_show_k_c_value_graphic = tk.Tk()
-        screen_show_k_c_value_graphic.title("RP Assignment: " + k_c_value_str + " Test")
-        screen_show_k_c_value_graphic['bg'] = self.background_color
-        screen_show_k_c_value_graphic.geometry("600x500")
-        screen_show_k_c_value_graphic.tk_setPalette(
-            background=self.background_color,
-            foreground=self.text_color)
+            plt.xlabel("C Value")
 
         # Call the method from controller to execute the C-value or K-value test
-        k_or_c_value = controller.test_k_and_c_value(classifier)
+        x_axis, y_axis, error_bar = controller.test_k_and_c_value(classifier)
 
-        # Title label
-        label1 = Label(
-            screen_show_k_c_value_graphic,
-            text="See the graphic below to choose your " + k_c_value_str,
-            font=20)
-        label1.config(anchor=CENTER)
-        label1.pack(pady=15)
+        # Check values on console
+        print("X axis values: ", x_axis)
+        print("Y axis values: ", y_axis)
+        print("Error bar values: ", error_bar)
 
-        # TODO: Show the C-value or K-value graphic
+        # Plot
+        plt.errorbar(x_axis, y_axis, error_bar, marker='^', capsize=3)
+        plt.show()
 
-        # Just a test
-        print("discovery_k_or_c_value: ", k_or_c_value)
+        # Window Definition to show the test graphic
+        # screen_show_k_c_value_graphic = tk.Tk()
+        # screen_show_k_c_value_graphic.title("RP Assignment: " + k_c_value_str + " Test")
+        # screen_show_k_c_value_graphic['bg'] = self.background_color
+        # screen_show_k_c_value_graphic.geometry("600x500")
+        # screen_show_k_c_value_graphic.tk_setPalette(
+        #     background=self.background_color,
+        #     foreground=self.text_color)
+
+        # # Title label
+        # label1 = Label(
+        #     screen_show_k_c_value_graphic,
+        #     text="See the graphic below to choose your " + k_c_value_str,
+        #     font=20)
+        # label1.config(anchor=CENTER)
+        # label1.pack(pady=15)
 
         # Execute the screen
-        screen_show_k_c_value_graphic.mainloop()
+        # screen_show_k_c_value_graphic.mainloop()
 
     # Method to destroy this screen
     def dismiss(self):

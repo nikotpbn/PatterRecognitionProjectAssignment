@@ -130,7 +130,7 @@ class Controller:
             'specificity': 0
         }
 
-        # Run the classification in order of the numbers of run chosen by the user
+        # Run classification as per user input
         for i in range(0, n_runs):
             # Variables
             misclassification_per_run = 0
@@ -138,6 +138,7 @@ class Controller:
             # Apply K-fold: splitting the dataset
             kf = KFold(n_splits=n_subsets)
 
+            # TODO: REMEMBER TO SHUFFLE TESTS
             # K-fold Executions
             for idx_train, idx_test in kf.split(self.data.dataset["data"], self.data.dataset["target"]):
                 # Train data
@@ -199,10 +200,88 @@ class Controller:
         self.results_view.show(self, classifier, cm_derivations)
 
     # Method to run the C-value or K-value test and prepare the screen show the graphic of this test
-    # TODO: Test run to discovery the best C-value or K-value
     def test_k_and_c_value(self, classifier):
-        print("test_k_and_c_value: ", classifier)
-        return 8
+        # Variables
+        tests_results = []
+        tests_results_std = []
+
+        if classifier == 3:
+            constant = [1, 3, 5, 7, 9]
+        else:
+            constant = [1, 2, 3, 4, 5]
+
+        cm_derivations = {
+            'FP': 0,
+            'FN': 0,
+            'TP': 0,
+            'TN': 0,
+            'misclassification': 0,
+            'misclassification_per_run': [],
+            'sensitivity': 0,
+            'specificity': 0
+        }
+
+        for i in range(0, 5):
+            # Variables
+            avg_misclassification = 0
+            fold_misclassification = []
+
+            # Apply K-fold: splitting the dataset
+            kf = KFold(n_splits=3)
+
+            # TODO: REMEMBER TO SHUFFLE TESTS
+            # K-fold Executions
+            for idx_train, idx_test in kf.split(self.data.dataset["data"], self.data.dataset["target"]):
+                # Train data
+                x_train = [self.data.dataset["data"][idx] for idx in idx_train]
+                x_train = np.asarray(x_train).astype(np.float64)
+                y_train = [self.data.dataset["target"][idx] for idx in idx_train]
+
+                # Test data
+                x_test = [self.data.dataset["data"][idx] for idx in idx_test]
+                x_test = np.asarray(x_test).astype(np.float64)
+                y_test = [self.data.dataset["target"][idx] for idx in idx_test]
+
+                # Check the classifier chosen to call the right method
+                # K-Nearest Neighbors (KNN)
+                if classifier == 3:
+                    cm = k_nearest_neighbors(x_train, y_train, x_test, y_test, constant[i])
+                # Support Vector Machines
+                else:
+                    cm = support_vector_machines(x_train, y_train, x_test, y_test, constant[i])
+
+                # Results
+                # Calculates TP, TN, FP, FN and update the dictionary
+                cm_derivations = cm_derivations_calculation(cm, cm_derivations)
+
+                # Calculate the average missclassifcation of all folds
+                avg_misclassification += misclassification(cm_derivations)
+
+                # Save misclassification per fold to calculate standard deviation
+                fold_misclassification.append(misclassification(cm_derivations))
+
+            # Save average misclassification per run
+            avg_misclassification /= 10
+
+            # Print tests results per run
+            print("Run ", i, " average misclassification: ", avg_misclassification)
+            print("Run ", i, " folds misclassification standard dev: ", np.std(fold_misclassification))
+
+            # Save results
+            tests_results.append(avg_misclassification)
+            tests_results_std.append(np.std(fold_misclassification))
+
+        # Print results for all runs
+        # print("Error %: ", np.multiply(tests_results, 100))
+        # print("Standard Deviation: ", tests_results_std)
+
+        # # Plot error bar chart
+        # plt.errorbar(k, np.multiply(tests_results, 100), tests_results_std, marker='^', capsize=3)
+        # plt.xlabel("K Value")
+        # plt.ylabel("Error %")
+        # plt.show()
+
+        return constant, np.multiply(tests_results, 100), tests_results_std
 
 
 # Run Program
