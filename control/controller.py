@@ -132,9 +132,8 @@ class Controller:
             misclassification_per_run = 0
 
             # Apply K-fold: splitting the dataset
-            kf = KFold(n_splits=n_subsets)
+            kf = KFold(n_splits=n_subsets, shuffle=True)
 
-            # TODO: REMEMBER TO SHUFFLE TESTS
             # K-fold Executions
             for idx_train, idx_test in kf.split(self.data.dataset["data"], self.data.dataset["target"]):
                 # Train data
@@ -229,9 +228,8 @@ class Controller:
             fold_misclassification = []
 
             # Apply K-fold: splitting the dataset
-            kf = KFold(n_splits=3)
+            kf = KFold(n_splits=3, shuffle=True)
 
-            # TODO: REMEMBER TO SHUFFLE TESTS
             # K-fold Executions
             for idx_train, idx_test in kf.split(self.data.dataset["data"], self.data.dataset["target"]):
                 # Train data

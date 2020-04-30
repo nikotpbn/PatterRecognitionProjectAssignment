@@ -51,7 +51,6 @@ def test_dataset(dataset=1, scenario=1, n_runs=3, n_subsets=3):
             # Apply K-fold: splitting the dataset
             kf = KFold(n_splits=n_subsets, shuffle=True)
 
-            # TODO: REMEMBER TO SHUFFLE TESTS
             # K-fold Executions
             for idx_train, idx_test in kf.split(data.dataset["data"], data.dataset["target"]):
                 # Train data
