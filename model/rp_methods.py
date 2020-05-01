@@ -5,7 +5,7 @@ from scipy import stats
 from sklearn import neighbors, svm
 from sklearn.decomposition import PCA
 from sklearn.naive_bayes import GaussianNB
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, multilabel_confusion_matrix
 from sklearn.feature_selection import f_classif
 from sklearn.feature_selection import SelectKBest
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
@@ -139,7 +139,7 @@ def run_pca(data, n_features):
 # Minimum distance classifier (MDC)
 def minimum_distance_classifier(x_train, y_train, x_test, y_test):
     # Variables to hold prediction and mean values of features
-    predict = []
+    prediction = []
     means = []
 
     # Transpose x_train and y_train to feature x readings
@@ -171,11 +171,9 @@ def minimum_distance_classifier(x_train, y_train, x_test, y_test):
         max_index = g_value.index(max(g_value))
 
         # Use the index to add label to prediction array
-        predict.append(activity_labels[max_index])
+        prediction.append(activity_labels[max_index])
 
-    cm = confusion_matrix(y_test, predict)
-
-    return cm
+    return prediction
 
 
 # Fisher Discriminant Analisys (Fisher LDA)
@@ -184,12 +182,9 @@ def fisher_discriminant_analisys(x_train, y_train, x_test, y_test):
     lda = LinearDiscriminantAnalysis().fit(x_train, y_train)
 
     # Classifier test
-    predict = lda.predict(x_test)
+    prediction = lda.predict(x_test)
 
-    # Prepare confusion matrix
-    cm = confusion_matrix(y_test, predict)
-
-    return cm
+    return prediction
 
 
 # Naive-Bayes Classifier
@@ -198,12 +193,9 @@ def bayes_classifier(x_train, y_train, x_test, y_test):
     gnb = GaussianNB()
 
     # Training and Classification
-    predict = gnb.fit(x_train, y_train).predict(x_test)
+    prediction = gnb.fit(x_train, y_train).predict(x_test)
 
-    # Prepare confusion matrix
-    cm = confusion_matrix(y_test, predict)
-
-    return cm
+    return prediction
 
 
 # KNN Classifier
@@ -216,12 +208,9 @@ def k_nearest_neighbors(x_train, y_train, x_test, y_test, constant):
         clf = neighbors.KNeighborsClassifier(k, weights=weights)
 
         clf.fit(x_train, y_train)
-        predict = clf.predict(x_test)
+        prediction = clf.predict(x_test)
 
-    # Prepare confusion matrix
-    cm = confusion_matrix(y_test, predict)
-
-    return cm
+    return prediction
 
 
 # SVM Classifier
@@ -234,12 +223,9 @@ def support_vector_machines(x_train, y_train, x_test, y_test, constant):
     clf.fit(x_train, y_train)
 
     # Classification
-    predict = clf.predict(x_test)
+    prediction = clf.predict(x_test)
 
-    # Prepare confusion matrix
-    cm = confusion_matrix(y_test, predict)
-
-    return cm
+    return prediction
 
 
 # Method to calculate the error of the classifier
@@ -251,18 +237,66 @@ def cm_derivations_calculation(cm, cm_derivations):
     true_negative = cm.sum() - (false_positive + false_negative + true_positive)
 
     # Dictionary update
-    cm_derivations["FP"] = false_positive
-    cm_derivations["FN"] = false_negative
-    cm_derivations["TP"] = true_positive
-    cm_derivations["TN"] = true_negative
+    cm_derivations["fp"] = false_positive
+    cm_derivations["fn"] = false_negative
+    cm_derivations["tp"] = true_positive
+    cm_derivations["tn"] = true_negative
+
+    print("OLD")
+    print("TP:", cm_derivations["tp"])
+    print("FN:", cm_derivations["fn"])
+    print("FP:", cm_derivations["fp"])
+    print("TN:", cm_derivations["tn"])
 
     return cm_derivations
 
 
+def performance_measurement(target, prediction, scenario, performance):
+    if scenario == 1:
+        cm = confusion_matrix(target, prediction, labels=['A', 'B'])
+        tn, fp, fn, tp = cm.ravel()
+        performance["tn"] = tn
+        performance["fp"] = fp
+        performance["fn"] = fn
+        performance["tp"] = tp
+
+    elif scenario == 2:
+        cm = multilabel_confusion_matrix(target, prediction, labels=['A', 'B', 'C'])
+        performance["tn"] = cm[:, 0, 0]
+        performance["fn"] = cm[:, 1, 0]
+        performance["tp"] = cm[:, 1, 1]
+        performance["fp"] = cm[:, 0, 1]
+
+    else:
+        cm = multilabel_confusion_matrix(target, prediction, labels=['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
+                                                                     'K', 'L', 'M', 'O', 'P', 'Q', 'R', 'S'])
+        performance["tn"] = cm[:, 0, 0]
+        performance["fn"] = cm[:, 1, 0]
+        performance["tp"] = cm[:, 1, 1]
+        performance["fp"] = cm[:, 0, 1]
+
+    # True Positive Rate (TPR) | Sensitivity
+    performance['sensitivity'] = performance["tp"] / (performance["tp"] + performance["fn"])
+
+    # True Negative Rate (TNR) | Specificity
+    performance['specificity'] = performance["tn"] / (performance["tn"] + performance["fp"])
+
+    # Misclassification
+    mc = (performance["fp"] + performance["fn"]) / (performance["fp"] + performance["fn"] + performance["tp"] + performance["tn"])
+    performance['avg_misclassification'] += mc
+    performance['misclassification_per_run'].append(mc)
+
+    # Accuracy
+    performance['accuracy'] = (performance["tp"] + performance["tn"]) / (performance["fp"] + performance["fn"] + performance["tp"] + performance["tn"])
+
+    print(cm)
+    return performance
+
+
 # Method to calculate the misclassification error
 def misclassification(cm_derivations):
-    numerator = cm_derivations["FP"] + cm_derivations["FN"]
-    denominator = cm_derivations["TP"] + cm_derivations["TN"] + cm_derivations["FP"] + cm_derivations["FN"]
+    numerator = cm_derivations["fp"] + cm_derivations["fn"]
+    denominator = cm_derivations["tp"] + cm_derivations["tn"] + cm_derivations["fp"] + cm_derivations["fn"]
 
     return numerator / denominator
 
@@ -270,10 +304,10 @@ def misclassification(cm_derivations):
 # Method to calculate the sensitivity
 def sensitivity(cm_derivations):
 
-    return cm_derivations["TP"] / (cm_derivations["TP"] + cm_derivations["FN"])
+    return cm_derivations["tp"] / (cm_derivations["tp"] + cm_derivations["fn"])
 
 
 # Method to calculate the specificity
 def specificity(cm_derivations):
 
-    return cm_derivations["TN"] / (cm_derivations["FP"] + cm_derivations["TN"])
+    return cm_derivations["tn"] / (cm_derivations["fp"] + cm_derivations["tn"])

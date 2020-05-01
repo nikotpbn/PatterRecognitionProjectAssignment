@@ -10,7 +10,8 @@ from view.choose_classifier import ChooseClassifier as ViewChooseClassifier
 from view.feature_selection import FeatureSelection as ViewFeatureSelectionAndReduction
 from model.rp_methods import kbest, kruskal_wallis, redundancy_measure, pca_analysis, run_pca, \
     minimum_distance_classifier, fisher_discriminant_analisys, bayes_classifier, k_nearest_neighbors, \
-    support_vector_machines, cm_derivations_calculation, misclassification, sensitivity, specificity
+    support_vector_machines, cm_derivations_calculation, misclassification, sensitivity, specificity, \
+    performance_measurement
 
 
 # Class controller
@@ -115,12 +116,13 @@ class Controller:
     # Core method that will run the chosen classifier and prepare the result the be shown
     def classify(self, n_runs, n_subsets, classifier, constant_value):
         # Structure to hold results of classification
-        cm_derivations = {
-            'FP': 0,
-            'FN': 0,
-            'TP': 0,
-            'TN': 0,
-            'misclassification': 0,
+        performance = {
+            'fp': 0,
+            'fn': 0,
+            'tp': 0,
+            'tn': 0,
+            'accuracy': 0,
+            'avg_misclassification': 0,
             'misclassification_per_run': [],
             'sensitivity': 0,
             'specificity': 0
@@ -136,6 +138,8 @@ class Controller:
 
             # K-fold Executions
             for idx_train, idx_test in kf.split(self.data.dataset["data"], self.data.dataset["target"]):
+                prediction = []
+
                 # Train data
                 x_train = [self.data.dataset["data"][idx] for idx in idx_train]
                 x_train = np.asarray(x_train).astype(np.float64)
@@ -149,44 +153,35 @@ class Controller:
                 # Check the classifier chosen to call the right method
                 # Minimum distance classifier (MDC)
                 if classifier == 1:
-                    cm = minimum_distance_classifier(x_train, y_train, x_test, y_test)
+                    prediction = minimum_distance_classifier(x_train, y_train, x_test, y_test)
                 # Fisher Discriminant Analisys (Fisher LDA)
                 elif classifier == 2:
-                    cm = fisher_discriminant_analisys(x_train, y_train, x_test, y_test)
+                    prediction = fisher_discriminant_analisys(x_train, y_train, x_test, y_test)
                 # K-Nearest Neighbors (KNN)
                 elif classifier == 3:
-                    cm = k_nearest_neighbors(x_train, y_train, x_test, y_test, constant_value)
+                    prediction = k_nearest_neighbors(x_train, y_train, x_test, y_test, constant_value)
                 # Bayes Classifier
                 elif classifier == 4:
-                    cm = bayes_classifier(x_train, y_train, x_test, y_test)
+                    prediction = bayes_classifier(x_train, y_train, x_test, y_test)
                 # Support Vector Machines
                 elif classifier == 5:
-                    cm = support_vector_machines(x_train, y_train, x_test, y_test, constant_value)
+                    prediction = support_vector_machines(x_train, y_train, x_test, y_test, constant_value)
 
-                # Results
-                # Calculates TP, TN, FP, FN and update the dictionary
-                cm_derivations = cm_derivations_calculation(cm, cm_derivations)
+                # Calculate performance TP, TN, FP and FN
+                performance = performance_measurement(y_test, prediction, data.scenario, performance)
 
-                # Calculates general misclassification
-                cm_derivations['misclassification'] += misclassification(cm_derivations)
+                print("#####################################  RESULTS #####################################")
+                print("True Positives: ", performance["tp"])
+                print("True Negatives: ", performance["tn"])
+                print("False Positives: ", performance["fp"])
+                print("False Negatives: ", performance["fn"])
+                print("Accuracy: ", performance['accuracy'])
+                print("True Positive Rate (TPR | Sensitivity): ", performance['sensitivity'])
+                print("True Negative Rate (TNR | Specificity): ", performance['specificity'])
+                print("Misclassification per fold: ", performance['misclassification_per_run'])
+                print("####################################################################################")
 
-                # Calculates misclassification for each run
-                misclassification_per_run += misclassification(cm_derivations)
-
-                # Calculates sensitivity
-                cm_derivations['sensitivity'] += sensitivity(cm_derivations)
-
-                # Calculates specificity
-                cm_derivations['specificity'] += specificity(cm_derivations)
-
-            # Save results per run
-            misclassification_per_run /= n_subsets
-            cm_derivations['misclassification_per_run'].append(misclassification_per_run)
-
-        # End results calculations
-        cm_derivations['misclassification'] = (cm_derivations['misclassification'] / (n_runs * n_subsets))
-        cm_derivations['sensitivity'] = cm_derivations['sensitivity'] / (n_runs * n_subsets)
-        cm_derivations['specificity'] = cm_derivations['specificity'] / (n_runs * n_subsets)
+            performance['avg_misclassification'] /= n_subsets
 
         # Screens processing
         # Destroy pca_utilization_view
@@ -194,7 +189,7 @@ class Controller:
 
         # Create the new screen: pca_graphics_view
         self.results_view = ViewResult()
-        self.results_view.show(self, classifier, cm_derivations)
+        self.results_view.show(self, classifier, performance, data.scenario)
 
     # Method to run the C-value or K-value test and prepare data to plot
     def test_k_and_c_value(self, classifier):
