@@ -92,80 +92,6 @@ class Result:
             add_label(self.screen_result, sensitivity)
             add_label(self.screen_result, specificity)
 
-        elif scenario == 2:
-            # TODO: Describe activity per id (it is used with get_results function)
-            # activity_id:
-            # 0 = A
-            # 1 = B
-            # 2 = C
-
-            # Variables
-            label_a = ""
-            label_b = ""
-            label_c = ""
-
-            # Interface tabs to show results per class
-            tab1 = tk.Frame(self.tab_parent)
-            tab2 = tk.Frame(self.tab_parent)
-            tab3 = tk.Frame(self.tab_parent)
-
-            # Set labels based on classifier choice
-            if classifier == 1:
-                label_a = "Class A results for MDC (Minimum Distance Classifier)"
-                label_b = "Class B results for MDC (Minimum Distance Classifier)"
-                label_c = "Class C results for MDC (Minimum Distance Classifier)"
-
-            elif classifier == 2:
-                label_a = "Class A results for FLDA (Fisher Discriminant Analysis)"
-                label_b = "Class B results for FLDA (Fisher Discriminant Analysis)"
-                label_c = "Class C results for FLDA (Fisher Discriminant Analysis)"
-
-            elif classifier == 3:
-                label_a = "Class A results for KNN (K Nearest Neighbors)"
-                label_b = "Class B results for KNN (K Nearest Neighbors)"
-                label_c = "Class C results for KNN (K Nearest Neighbors)"
-
-            elif classifier == 4:
-                label_a = "Class A results for Naive-Bayes"
-                label_b = "Class B results for Naive-Bayes"
-                label_c = "Class C results for Naive-Bayes"
-
-            elif classifier == 5:
-                label_a = "Class A results for SVM (Support Vector Machine)"
-                label_b = "Class B results for SVM (Support Vector Machine)"
-                label_c = "Class C results for SVM (Support Vector Machine)"
-
-            # Get results from performance dict using activity_id
-            mean_error_a, sensitivity_a, specificity_a = get_results(performance, 0)
-            mean_error_b, sensitivity_b, specificity_b = get_results(performance, 1)
-            mean_error_c, sensitivity_c, specificity_c = get_results(performance, 2)
-
-            # Set labels inside tab 1
-            add_label(tab1, label_a)
-            add_label(tab1, mean_error_a)
-            add_label(tab1, sensitivity_a)
-            add_label(tab1, specificity_a)
-
-            # Set labels inside tab 2
-            add_label(tab2, label_b)
-            add_label(tab2, mean_error_b)
-            add_label(tab2, sensitivity_b)
-            add_label(tab2, specificity_b)
-
-            # Set labels inside tab 3
-            add_label(tab3, label_c)
-            add_label(tab3, mean_error_c)
-            add_label(tab3, sensitivity_c)
-            add_label(tab3, specificity_c)
-
-            # Add tabs to parent container
-            self.tab_parent.add(tab1, text="Class A")
-            self.tab_parent.add(tab2, text="Class B")
-            self.tab_parent.add(tab3, text="Class C")
-
-            # Pack tabs into parent container
-            self.tab_parent.pack(expand=1, fill='both')
-
         else:
             # activity_id:
             # 1 = A
@@ -175,33 +101,42 @@ class Result:
             # 18 = S
 
             # Variables
+            # Set the number of classes based on the scenario
+            if scenario == 2:
+                n_classes = 3
+
+            else:
+                n_classes = 18
+                # Readjust screen size for scenario C to show all tabs
+                self.screen_result.geometry("1100x400")
+
             labels = []
-            tabs = [tk.Frame(self.tab_parent) for i in range(18)]
+            tabs = [tk.Frame(self.tab_parent) for i in range(n_classes)]
             activity_label = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
                               'K', 'L', 'M', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', ]
 
             # Set labels based on classifier choice
             if classifier == 1:
-                for i in range(0, 18):
+                for i in range(0, n_classes):
                     labels.append("Class %s results for MDC (Minimum Distance Classifier)" % activity_label[i])
 
             elif classifier == 2:
-                for i in range(0, 18):
+                for i in range(0, n_classes):
                     labels.append("Class %s results for FLDA (Fisher Discriminant Analysis)" % activity_label[i])
 
             elif classifier == 3:
-                for i in range(0, 18):
+                for i in range(0, n_classes):
                     labels.append("Class %s results for KNN (K Nearest Neighbors)" % activity_label[i])
 
             elif classifier == 4:
-                for i in range(0, 18):
+                for i in range(0, n_classes):
                     labels.append("Class %s results for Naive-Bayes" % activity_label[i])
 
             elif classifier == 5:
-                for i in range(0, 18):
+                for i in range(0, n_classes):
                     labels.append("Class %s results for SVM (Support Vector Machine)" % activity_label[i])
 
-            for i in range(0, 18):
+            for i in range(0, n_classes):
                 # Get and Set results for all tabs
                 mean_error, sensitivity, specificity = get_results(performance, i)
                 add_label(tabs[i], labels[i])
@@ -212,9 +147,6 @@ class Result:
                 # Add tabs to parent container
                 text = "Class %s" % activity_label[i]
                 self.tab_parent.add(tabs[i], text=text)
-
-            # Readjust screen size
-            self.screen_result.geometry("1100x400")
 
             # Pack tabs into parent container
             self.tab_parent.pack(expand=1, fill='both')
