@@ -183,13 +183,14 @@ class Controller:
                 print("Misclassification per fold: ", performance['misclassification_per_run'])
                 print("####################################################################################")
 
+            # Calculate average misclassification
             performance['avg_misclassification'] /= n_subsets
 
         performance['avg_misclassification'] /= n_runs
 
         # Screens processing
-        # Destroy pca_utilization_view
-        self.choose_classifier_view.dismiss()
+        # Destroy classifier choice view
+        # self.choose_classifier_view.dismiss()
 
         # Create the new screen: pca_graphics_view
         self.results_view = ViewResult()
@@ -252,13 +253,13 @@ class Controller:
 
                 # Results
                 # Calculates TP, TN, FP, FN and update the dictionary
-                cm_derivations = performance_measurement(y_test, prediction, data.scenario, performance)
+                performance = performance_measurement(y_test, prediction, data.scenario, performance)
 
                 # Calculate the average missclassifcation of all folds
-                avg_misclassification += misclassification(cm_derivations)
+                avg_misclassification += misclassification(performance)
 
                 # Save misclassification per fold to calculate standard deviation
-                fold_misclassification.append(misclassification(cm_derivations))
+                fold_misclassification.append(misclassification(performance))
 
             # Save average misclassification per run
             avg_misclassification /= 10
@@ -268,7 +269,7 @@ class Controller:
             print("Run ", i, " folds misclassification standard dev: ", np.std(fold_misclassification))
 
             # Save results
-            tests_results.append(avg_misclassification)
+            tests_results.append(np.sum(avg_misclassification) / 3)
             tests_results_std.append(np.std(fold_misclassification))
 
         return constant, np.multiply(tests_results, 100), tests_results_std

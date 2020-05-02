@@ -289,7 +289,7 @@ def performance_measurement(target, prediction, scenario, performance):
     # Accuracy
     performance['accuracy'] = (performance["tp"] + performance["tn"]) / (performance["fp"] + performance["fn"] + performance["tp"] + performance["tn"])
 
-    print(cm)
+    # print(cm)
     return performance
 
 
