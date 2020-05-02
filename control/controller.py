@@ -21,6 +21,8 @@ class Controller:
         # Attributes
         # General
         self.data = Dataset()
+        self.activity_label = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
+                               'K', 'L', 'M', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', ]
 
         # Views
         self.results_view = None
@@ -183,6 +185,8 @@ class Controller:
 
             performance['avg_misclassification'] /= n_subsets
 
+        performance['avg_misclassification'] /= n_runs
+
         # Screens processing
         # Destroy pca_utilization_view
         self.choose_classifier_view.dismiss()
@@ -192,6 +196,7 @@ class Controller:
         self.results_view.show(self, classifier, performance, data.scenario)
 
     # Method to run the C-value or K-value test and prepare data to plot
+    # TODO: Fix this method to support new performance measurement
     def test_k_and_c_value(self, classifier):
         # Variables
         tests_results = []
@@ -205,12 +210,12 @@ class Controller:
             constant = [1, 2, 3, 4, 5]
 
         # Structure to hold results of classification
-        cm_derivations = {
-            'FP': 0,
-            'FN': 0,
-            'TP': 0,
-            'TN': 0,
-            'misclassification': 0,
+        performance = {
+            'fp': 0,
+            'fn': 0,
+            'tp': 0,
+            'tn': 0,
+            'avg_misclassification': 0,
             'misclassification_per_run': [],
             'sensitivity': 0,
             'specificity': 0
@@ -240,14 +245,14 @@ class Controller:
                 # Check the classifier chosen to call the right method
                 # K-Nearest Neighbors (KNN)
                 if classifier == 3:
-                    cm = k_nearest_neighbors(x_train, y_train, x_test, y_test, constant[i])
+                    prediction = k_nearest_neighbors(x_train, y_train, x_test, y_test, constant[i])
                 # Support Vector Machines
                 else:
-                    cm = support_vector_machines(x_train, y_train, x_test, y_test, constant[i])
+                    prediction = support_vector_machines(x_train, y_train, x_test, y_test, constant[i])
 
                 # Results
                 # Calculates TP, TN, FP, FN and update the dictionary
-                cm_derivations = cm_derivations_calculation(cm, cm_derivations)
+                cm_derivations = performance_measurement(y_test, prediction, data.scenario, performance)
 
                 # Calculate the average missclassifcation of all folds
                 avg_misclassification += misclassification(cm_derivations)
