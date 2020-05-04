@@ -10,8 +10,7 @@ from view.choose_classifier import ChooseClassifier as ViewChooseClassifier
 from view.feature_selection import FeatureSelection as ViewFeatureSelectionAndReduction
 from model.rp_methods import kbest, kruskal_wallis, redundancy_measure, pca_analysis, run_pca, \
     minimum_distance_classifier, fisher_discriminant_analisys, bayes_classifier, k_nearest_neighbors, \
-    support_vector_machines, cm_derivations_calculation, misclassification, sensitivity, specificity, \
-    performance_measurement
+    support_vector_machines, misclassification, performance_measurement, print_performance
 
 
 # Class controller
@@ -117,23 +116,20 @@ class Controller:
 
     # Core method that will run the chosen classifier and prepare the result the be shown
     def classify(self, n_runs, n_subsets, classifier, constant_value):
-        # Structure to hold results of classification
-        performance = {
-            'fp': 0,
-            'fn': 0,
-            'tp': 0,
-            'tn': 0,
-            'accuracy': 0,
-            'avg_misclassification': 0,
-            'misclassification_per_run': [],
-            'sensitivity': 0,
-            'specificity': 0
-        }
-
         # Run classification as per user input
         for i in range(0, n_runs):
-            # Variables
-            misclassification_per_run = 0
+            # Structure to hold results of classification
+            performance = {
+                'fp': 0,
+                'fn': 0,
+                'tp': 0,
+                'tn': 0,
+                'accuracy': 0,
+                'avg_misclassification': 0,
+                'misclassification_per_fold': [],
+                'sensitivity': 0,
+                'specificity': 0
+            }
 
             # Apply K-fold: splitting the dataset
             kf = KFold(n_splits=n_subsets, shuffle=True)
@@ -172,21 +168,11 @@ class Controller:
                 # Calculate performance TP, TN, FP and FN
                 performance = performance_measurement(y_test, prediction, data.scenario, performance)
 
-                print("#####################################  RESULTS #####################################")
-                print("True Positives: ", performance["tp"])
-                print("True Negatives: ", performance["tn"])
-                print("False Positives: ", performance["fp"])
-                print("False Negatives: ", performance["fn"])
-                print("Accuracy: ", performance['accuracy'])
-                print("True Positive Rate (TPR | Sensitivity): ", performance['sensitivity'])
-                print("True Negative Rate (TNR | Specificity): ", performance['specificity'])
-                print("Misclassification per fold: ", performance['misclassification_per_run'])
-                print("####################################################################################")
-
             # Calculate average misclassification
             performance['avg_misclassification'] /= n_subsets
-
-        performance['avg_misclassification'] /= n_runs
+            performance['sensitivity'] /= n_subsets
+            performance['specificity'] /= n_subsets
+            print_performance(performance)
 
         # Screens processing
         # Destroy classifier choice view
@@ -197,7 +183,6 @@ class Controller:
         self.results_view.show(self, classifier, performance, data.scenario)
 
     # Method to run the C-value or K-value test and prepare data to plot
-    # TODO: Fix this method to support new performance measurement
     def test_k_and_c_value(self, classifier):
         # Variables
         tests_results = []
@@ -210,20 +195,21 @@ class Controller:
         else:
             constant = [1, 2, 3, 4, 5]
 
-        # Structure to hold results of classification
-        performance = {
-            'fp': 0,
-            'fn': 0,
-            'tp': 0,
-            'tn': 0,
-            'avg_misclassification': 0,
-            'misclassification_per_run': [],
-            'sensitivity': 0,
-            'specificity': 0
-        }
-
         # Do five runs
         for i in range(0, 5):
+            # Structure to hold results of classification
+            performance = {
+                'fp': 0,
+                'fn': 0,
+                'tp': 0,
+                'tn': 0,
+                'accuracy': 0,
+                'avg_misclassification': 0,
+                'misclassification_per_fold': [],
+                'sensitivity': 0,
+                'specificity': 0
+            }
+
             # Variables
             avg_misclassification = 0
             fold_misclassification = []
@@ -262,7 +248,7 @@ class Controller:
                 fold_misclassification.append(misclassification(performance))
 
             # Save average misclassification per run
-            avg_misclassification /= 10
+            avg_misclassification /= 5
 
             # Print tests results per run
             print("Run ", i, " average misclassification: ", avg_misclassification)

@@ -251,7 +251,9 @@ def cm_derivations_calculation(cm, cm_derivations):
     return cm_derivations
 
 
+# Function to measure performance of the classifier
 def performance_measurement(target, prediction, scenario, performance):
+    # Generate confusion matrix based on scenario
     if scenario == 1:
         cm = confusion_matrix(target, prediction, labels=['A', 'B'])
         tn, fp, fn, tp = cm.ravel()
@@ -275,22 +277,37 @@ def performance_measurement(target, prediction, scenario, performance):
         performance["tp"] = cm[:, 1, 1]
         performance["fp"] = cm[:, 0, 1]
 
-    # True Positive Rate (TPR) | Sensitivity
-    performance['sensitivity'] = performance["tp"] / (performance["tp"] + performance["fn"])
+    # Compute True Positive Rate (TPR) | Sensitivity
+    performance['sensitivity'] += performance["tp"] / (performance["tp"] + performance["fn"])
 
-    # True Negative Rate (TNR) | Specificity
-    performance['specificity'] = performance["tn"] / (performance["tn"] + performance["fp"])
+    # Compute True Negative Rate (TNR) | Specificity
+    performance['specificity'] += performance["tn"] / (performance["tn"] + performance["fp"])
 
-    # Misclassification
+    # Compute Misclassification
     mc = (performance["fp"] + performance["fn"]) / (performance["fp"] + performance["fn"] + performance["tp"] + performance["tn"])
     performance['avg_misclassification'] += mc
-    performance['misclassification_per_run'].append(mc)
+    performance['misclassification_per_fold'].append(mc)
 
-    # Accuracy
-    performance['accuracy'] = (performance["tp"] + performance["tn"]) / (performance["fp"] + performance["fn"] + performance["tp"] + performance["tn"])
+    # Compute Accuracy
+    accuracy = (performance["tp"] + performance["tn"]) / (performance["fp"] + performance["fn"] + performance["tp"] + performance["tn"])
+    performance['accuracy'] += accuracy
 
     # print(cm)
     return performance
+
+
+def print_performance(performance):
+    print("#####################################  RESULTS #####################################")
+    print("True Positives: ", performance["tp"])
+    print("True Negatives: ", performance["tn"])
+    print("False Positives: ", performance["fp"])
+    print("False Negatives: ", performance["fn"])
+    print("Accuracy: ", performance['accuracy'])
+    print("Average True Positive Rate (TPR | Sensitivity): ", performance['sensitivity'])
+    print("Average True Negative Rate (TNR | Specificity): ", performance['specificity'])
+    print("Misclassification per fold: ", performance['misclassification_per_fold'])
+    print("Average Misclassification: ", performance['avg_misclassification'])
+    print("####################################################################################")
 
 
 # Method to calculate the misclassification error
