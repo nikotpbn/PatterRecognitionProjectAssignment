@@ -187,78 +187,75 @@ class Controller:
         # Variables
         tests_results = []
         tests_results_std = []
-
-        # KNN values of K
-        if classifier == 3:
-            constant = [1, 3, 5, 7, 9]
-        # SVM values of C
-        else:
-            constant = [1, 2, 3, 4, 5]
+        constant = []
 
         # Do five runs
-        for i in range(0, 5):
-            # Structure to hold results of classification
-            performance = {
-                'fp': 0,
-                'fn': 0,
-                'tp': 0,
-                'tn': 0,
-                'accuracy': 0,
-                'avg_misclassification': 0,
-                'misclassification_per_fold': [],
-                'sensitivity': 0,
-                'specificity': 0
-            }
+        for i in range(1, 102):
+            if i == 1 or i % 2 != 0:
+                constant.append(i)
+                # Structure to hold results of classification
+                performance = {
+                    'fp': 0,
+                    'fn': 0,
+                    'tp': 0,
+                    'tn': 0,
+                    'accuracy': 0,
+                    'avg_misclassification': 0,
+                    'misclassification_per_fold': [],
+                    'sensitivity': 0,
+                    'specificity': 0
+                }
 
-            # Variables
-            avg_misclassification = 0
-            fold_misclassification = []
+                # Variables
+                avg_misclassification = 0
+                fold_misclassification = []
 
-            # Apply K-fold: splitting the dataset
-            kf = KFold(n_splits=3, shuffle=True)
+                # Apply K-fold: splitting the dataset
+                kf = KFold(n_splits=3, shuffle=True)
 
-            # K-fold Executions
-            for idx_train, idx_test in kf.split(self.data.dataset["data"], self.data.dataset["target"]):
-                # Train data
-                x_train = [self.data.dataset["data"][idx] for idx in idx_train]
-                x_train = np.asarray(x_train).astype(np.float64)
-                y_train = [self.data.dataset["target"][idx] for idx in idx_train]
+                # K-fold Executions
+                for idx_train, idx_test in kf.split(self.data.dataset["data"], self.data.dataset["target"]):
+                    # Train data
+                    x_train = [self.data.dataset["data"][idx] for idx in idx_train]
+                    x_train = np.asarray(x_train).astype(np.float64)
+                    y_train = [self.data.dataset["target"][idx] for idx in idx_train]
 
-                # Test data
-                x_test = [self.data.dataset["data"][idx] for idx in idx_test]
-                x_test = np.asarray(x_test).astype(np.float64)
-                y_test = [self.data.dataset["target"][idx] for idx in idx_test]
+                    # Test data
+                    x_test = [self.data.dataset["data"][idx] for idx in idx_test]
+                    x_test = np.asarray(x_test).astype(np.float64)
+                    y_test = [self.data.dataset["target"][idx] for idx in idx_test]
 
-                # Check the classifier chosen to call the right method
-                # K-Nearest Neighbors (KNN)
-                if classifier == 3:
-                    prediction = k_nearest_neighbors(x_train, y_train, x_test, y_test, constant[i])
-                # Support Vector Machines
-                else:
-                    prediction = support_vector_machines(x_train, y_train, x_test, y_test, constant[i])
+                    # Check the classifier chosen to call the right method
+                    # K-Nearest Neighbors (KNN)
+                    if classifier == 3:
+                        prediction = k_nearest_neighbors(x_train, y_train, x_test, y_test, i)
+                    # Support Vector Machines
+                    else:
+                        prediction = support_vector_machines(x_train, y_train, x_test, y_test, i)
 
-                # Results
-                # Calculates TP, TN, FP, FN and update the dictionary
-                performance = performance_measurement(y_test, prediction, data.scenario, performance)
+                    # Results
+                    # Calculates TP, TN, FP, FN and update the dictionary
+                    performance = performance_measurement(y_test, prediction, data.scenario, performance)
 
-                # Calculate the average missclassifcation of all folds
-                avg_misclassification += misclassification(performance)
+                    # Calculate the average missclassifcation of all folds
+                    avg_misclassification += misclassification(performance)
 
-                # Save misclassification per fold to calculate standard deviation
-                fold_misclassification.append(misclassification(performance))
+                    # Save misclassification per fold to calculate standard deviation
+                    fold_misclassification.append(misclassification(performance))
 
-            # Save average misclassification per run
-            avg_misclassification /= 5
+                # Save average misclassification per run
+                avg_misclassification /= 5
 
-            # Print tests results per run
-            print("Run ", i, " average misclassification: ", avg_misclassification)
-            print("Run ", i, " folds misclassification standard dev: ", np.std(fold_misclassification))
+                # Print tests results per run
+                # print("Run ", i, " average misclassification: ", avg_misclassification)
+                # print("Run ", i, " folds misclassification standard dev: ", np.std(fold_misclassification))
+                print("run ", i, "finished.")
 
-            # Save results
-            tests_results.append(np.sum(avg_misclassification) / 3)
-            tests_results_std.append(np.std(fold_misclassification))
+                # Save results
+                tests_results.append(np.sum(avg_misclassification) / 3)
+                tests_results_std.append(np.std(fold_misclassification))
 
-        return constant, np.multiply(tests_results, 100), tests_results_std
+        return constant, np.multiply(tests_results, 100), np.multiply(tests_results_std, 100)
 
 
 # Run Program

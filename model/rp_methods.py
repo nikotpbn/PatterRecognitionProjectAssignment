@@ -53,7 +53,7 @@ def kruskal_wallis(data, n_features):
         h_array.append(values)
 
     # Sort array in crescent order
-    sorted_h = sorted(h_array, key=lambda h_val: h_val[0])
+    sorted_h = sorted(h_array, key=lambda h_val: h_val[0], reverse=True)
 
     # Select patterns using index from computed H value
     for i in range(0, n_features):

@@ -5,13 +5,13 @@ from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 from model.dataset import Dataset
 from sklearn.model_selection import KFold
-from model.rp_methods import kruskal_wallis, redundancy_measure
+from model.rp_methods import kruskal_wallis, redundancy_measure, run_pca
 from model.rp_methods import performance_measurement
 from model.rp_methods import bayes_classifier, support_vector_machines, \
     k_nearest_neighbors, minimum_distance_classifier, fisher_discriminant_analisys
 
 
-def test_dataset(path, dataset=1, scenario=1, n_runs=3, n_subsets=3):
+def test_dataset(path, dataset=1, scenario=1, n_runs=3, n_subsets=3, k=3, c=1, pca=0):
     # Variables
     data = Dataset()
     runs_performance = {}
@@ -24,29 +24,33 @@ def test_dataset(path, dataset=1, scenario=1, n_runs=3, n_subsets=3):
 
     # Select test data
     data.choose_data(dataset)
-    print(data.database_selected_str, "data loaded.")
+    # print(data.database_selected_str, "data loaded.")
 
     # Pre-process data
     data.scenario_pre_processing(scenario)
-    print("Finished pre-processing data for", data.scenario_selected_str)
+    # print("Finished pre-processing data for", data.scenario_selected_str)
 
     # Apply Kruskal-Wallis
     data.set_feature_selection_method(2)
-    data.dataset = kruskal_wallis(data.dataset, 91)
-    print("Finished applying kruskal-wallis feature selection method.")
+    data.dataset = kruskal_wallis(data.dataset, len(data.dataset['label']))
+    # print("Finished applying kruskal-wallis feature selection method.")
 
     # Apply Correlation redundancy measure
     data.dataset, unused_label = redundancy_measure(data.dataset)
-    print("Correlation rendundancy measure applied.")
-    print("Begining tests...this might take a while")
+    # print("Correlation rendundancy measure applied.")
+    # print("Begining tests...this might take a while")
+
+    if pca == 1:
+        data.dataset = run_pca(data.dataset, len(data.dataset['label']))
 
     # For all 5 classifiers
-    for c in range(1, 6):
+    for classifier in range(1, 6):
         # Variable to hold all runs for all classifiers
-        runs_performance[c] = {}
+        runs_performance[classifier] = {}
 
         # Run "n_runs" tests
-        for i in range(0, n_runs):
+        for run in range(0, n_runs):
+            print("run %s for classifier %s" % (str(run), str(classifier)))
             # Structure to hold results of classification
             performance = {
                 'fp': 0,
@@ -61,7 +65,7 @@ def test_dataset(path, dataset=1, scenario=1, n_runs=3, n_subsets=3):
             }
 
             # Create dict to save run results
-            runs_performance[c][i] = {}
+            runs_performance[classifier][run] = {}
 
             # Apply K-fold: splitting the dataset
             kf = KFold(n_splits=n_subsets, shuffle=True)
@@ -82,26 +86,24 @@ def test_dataset(path, dataset=1, scenario=1, n_runs=3, n_subsets=3):
                 y_test = [data.dataset["target"][idx] for idx in idx_test]
 
                 # Minimum distance classifier (MDC)
-                if c == 1:
+                if classifier == 1:
                     prediction = minimum_distance_classifier(x_train, y_train, x_test, y_test)
 
                 # Fisher Discriminant Analisys (Fisher LDA)
-                elif c == 2:
+                elif classifier == 2:
                     prediction = fisher_discriminant_analisys(x_train, y_train, x_test, y_test)
 
                 # K-Nearest Neighbors (KNN)
-                elif c == 3:
-                    constant_value = 3
-                    prediction = k_nearest_neighbors(x_train, y_train, x_test, y_test, constant_value)
+                elif classifier == 3:
+                    prediction = k_nearest_neighbors(x_train, y_train, x_test, y_test, k)
 
                 # Bayes Classifier
-                elif c == 4:
+                elif classifier == 4:
                     prediction = bayes_classifier(x_train, y_train, x_test, y_test)
 
                 # Support Vector Machines
-                elif c == 5:
-                    constant_value = 1
-                    prediction = support_vector_machines(x_train, y_train, x_test, y_test, constant_value)
+                elif classifier == 5:
+                    prediction = support_vector_machines(x_train, y_train, x_test, y_test, c)
 
                 # Performance measurement
                 performance = performance_measurement(y_test, prediction, scenario, performance)
@@ -117,16 +119,14 @@ def test_dataset(path, dataset=1, scenario=1, n_runs=3, n_subsets=3):
 
             # Add values into the sheet
             ws.cell(column=1, row=row, value=dataset)
-            ws.cell(column=2, row=row, value=i)
-            ws.cell(column=3, row=row, value=c)
+            ws.cell(column=2, row=row, value=run)
+            ws.cell(column=3, row=row, value=classifier)
             set_values(ws, scenario, performance, row)
             row += 1
 
             # Save performance measurement per run
-            runs_performance[c][i]["performance"] = performance
-            runs_performance[c][i]["scenario"] = scenario
-
-    print("Finished")
+            runs_performance[classifier][run]["performance"] = performance
+            runs_performance[classifier][run]["scenario"] = scenario
 
     # For debug
     # for classifier in runs_performance:

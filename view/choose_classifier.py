@@ -194,12 +194,13 @@ class ChooseClassifier:
         x_axis, y_axis, error_bar = controller.test_k_and_c_value(classifier)
 
         # Check values on console
-        print("X axis values: ", x_axis)
-        print("Y axis values: ", y_axis)
-        print("Error bar values: ", error_bar)
+        # print("X axis values: ", x_axis)
+        # print("Y axis values: ", y_axis)
+        # print("Error bar values: ", error_bar)
 
         # Plot
-        plt.errorbar(x_axis, y_axis, error_bar, marker='^', capsize=3)
+        plt.errorbar(x_axis, y_axis, error_bar, marker='o', capsize=3)
+        plt.xticks(x_axis)
         plt.show()
 
     # Method to destroy this screen
