@@ -2,8 +2,8 @@ from model.tests import test_dataset, new_sheet
 
 # Variables
 scenario = 1
-n_runs = 2
-n_subsets = 3
+n_runs = 50
+n_subsets = 10
 pca = 0
 
 # Create a new file
