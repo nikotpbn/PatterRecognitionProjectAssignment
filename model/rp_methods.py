@@ -228,29 +228,6 @@ def support_vector_machines(x_train, y_train, x_test, y_test, constant):
     return prediction
 
 
-# Method to calculate the error of the classifier
-def cm_derivations_calculation(cm, cm_derivations):
-    # Error calculation
-    false_positive = round(sum(cm.sum(axis=0) - np.diag(cm)) / len(cm.sum(axis=0) - np.diag(cm)))
-    false_negative = round(sum(cm.sum(axis=1) - np.diag(cm)) / len(cm.sum(axis=1) - np.diag(cm)))
-    true_positive = round(sum(np.diag(cm)) / len(np.diag(cm)))
-    true_negative = cm.sum() - (false_positive + false_negative + true_positive)
-
-    # Dictionary update
-    cm_derivations["fp"] = false_positive
-    cm_derivations["fn"] = false_negative
-    cm_derivations["tp"] = true_positive
-    cm_derivations["tn"] = true_negative
-
-    print("OLD")
-    print("TP:", cm_derivations["tp"])
-    print("FN:", cm_derivations["fn"])
-    print("FP:", cm_derivations["fp"])
-    print("TN:", cm_derivations["tn"])
-
-    return cm_derivations
-
-
 # Function to measure performance of the classifier
 def performance_measurement(target, prediction, scenario, performance):
     # Generate confusion matrix based on scenario
@@ -283,14 +260,17 @@ def performance_measurement(target, prediction, scenario, performance):
     # Compute True Negative Rate (TNR) | Specificity
     performance['specificity'] += performance["tn"] / (performance["tn"] + performance["fp"])
 
-    # Compute Misclassification
-    mc = (performance["fp"] + performance["fn"]) / (performance["fp"] + performance["fn"] + performance["tp"] + performance["tn"])
-    performance['avg_misclassification'] += mc
-    performance['misclassification_per_fold'].append(mc)
-
     # Compute Accuracy
     accuracy = (performance["tp"] + performance["tn"]) / (performance["fp"] + performance["fn"] + performance["tp"] + performance["tn"])
     performance['accuracy'] += accuracy
+
+    # Compute Misclassification
+    mc = (performance["fp"] + performance["fn"]) / (performance["fp"] + performance["fn"] + performance["tp"] + performance["tn"])
+    performance['avg_misclassification'] += mc
+
+    # Save misclassification per fold and its average
+    performance['misclassification_per_fold'].append(mc)
+    performance['avg_misclassification_per_fold'].append(np.average(mc))
 
     # print(cm)
     return performance
@@ -308,23 +288,3 @@ def print_performance(performance):
     print("Misclassification per fold: ", performance['misclassification_per_fold'])
     print("Average Misclassification: ", performance['avg_misclassification'])
     print("####################################################################################")
-
-
-# Method to calculate the misclassification error
-def misclassification(cm_derivations):
-    numerator = cm_derivations["fp"] + cm_derivations["fn"]
-    denominator = cm_derivations["tp"] + cm_derivations["tn"] + cm_derivations["fp"] + cm_derivations["fn"]
-
-    return numerator / denominator
-
-
-# Method to calculate the sensitivity
-def sensitivity(cm_derivations):
-
-    return cm_derivations["tp"] / (cm_derivations["tp"] + cm_derivations["fn"])
-
-
-# Method to calculate the specificity
-def specificity(cm_derivations):
-
-    return cm_derivations["tn"] / (cm_derivations["fp"] + cm_derivations["tn"])

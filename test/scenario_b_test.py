@@ -4,7 +4,7 @@ from model.tests import test_dataset, new_sheet
 scenario = 2
 n_runs = 2
 n_subsets = 3
-pca = 0
+pca = 1
 
 # Create a new file
 path, worksheet = new_sheet(scenario)

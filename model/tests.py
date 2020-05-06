@@ -51,19 +51,6 @@ def test_dataset(path, dataset=1, scenario=1, n_runs=3, n_subsets=3, k=3, c=1, p
         # Run "n_runs" tests
         for run in range(0, n_runs):
             print("run %s for classifier %s" % (str(run), str(classifier)))
-            # Structure to hold results of classification
-            performance = {
-                'fp': 0,
-                'fn': 0,
-                'tp': 0,
-                'tn': 0,
-                'accuracy': 0,
-                'avg_misclassification': 0,
-                'misclassification_per_fold': [],
-                'sensitivity': 0,
-                'specificity': 0
-            }
-
             # Create dict to save run results
             runs_performance[classifier][run] = {}
 
@@ -106,7 +93,7 @@ def test_dataset(path, dataset=1, scenario=1, n_runs=3, n_subsets=3, k=3, c=1, p
                     prediction = support_vector_machines(x_train, y_train, x_test, y_test, c)
 
                 # Performance measurement
-                performance = performance_measurement(y_test, prediction, scenario, performance)
+                performance = performance_measurement(y_test, prediction, scenario)
 
             # Calculate averages
             performance['avg_misclassification'] /= n_subsets

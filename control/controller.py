@@ -10,7 +10,7 @@ from view.choose_classifier import ChooseClassifier as ViewChooseClassifier
 from view.feature_selection import FeatureSelection as ViewFeatureSelectionAndReduction
 from model.rp_methods import kbest, kruskal_wallis, redundancy_measure, pca_analysis, run_pca, \
     minimum_distance_classifier, fisher_discriminant_analisys, bayes_classifier, k_nearest_neighbors, \
-    support_vector_machines, misclassification, performance_measurement, print_performance
+    support_vector_machines, performance_measurement, print_performance
 
 
 # Class controller
@@ -118,19 +118,6 @@ class Controller:
     def classify(self, n_runs, n_subsets, classifier, constant_value):
         # Run classification as per user input
         for i in range(0, n_runs):
-            # Structure to hold results of classification
-            performance = {
-                'fp': 0,
-                'fn': 0,
-                'tp': 0,
-                'tn': 0,
-                'accuracy': 0,
-                'avg_misclassification': 0,
-                'misclassification_per_fold': [],
-                'sensitivity': 0,
-                'specificity': 0
-            }
-
             # Apply K-fold: splitting the dataset
             kf = KFold(n_splits=n_subsets, shuffle=True)
 
@@ -165,8 +152,8 @@ class Controller:
                 elif classifier == 5:
                     prediction = support_vector_machines(x_train, y_train, x_test, y_test, constant_value)
 
-                # Calculate performance TP, TN, FP and FN
-                performance = performance_measurement(y_test, prediction, data.scenario, performance)
+                # Calculate performance
+                performance = performance_measurement(y_test, prediction, data.scenario)
 
             # Calculate average misclassification
             performance['avg_misclassification'] /= n_subsets
@@ -185,33 +172,40 @@ class Controller:
     # Method to run the C-value or K-value test and prepare data to plot
     def test_k_and_c_value(self, classifier):
         # Variables
+        run = 1
         tests_results = []
+        constant_values = []
         tests_results_std = []
-        constant = []
+        if classifier == 3:
+            n_runs = 50
+            n_subsets = 10
 
-        # Do five runs
-        for i in range(1, 102):
+        else:
+            n_runs = 10
+            n_subsets = 3
+
+        # 50 Runs is K=[1, 3, 5, 7, 9,..100]
+        for i in range(1, n_runs*2):
+            # Structure to hold results of classification
+            performance = {
+                'fp': 0,
+                'fn': 0,
+                'tp': 0,
+                'tn': 0,
+                'accuracy': 0,
+                'avg_misclassification': 0,
+                'misclassification_per_fold': [],
+                'avg_misclassification_per_fold': [],
+                'sensitivity': 0,
+                'specificity': 0
+            }
+
+            # Check if value is odd
             if i == 1 or i % 2 != 0:
-                constant.append(i)
-                # Structure to hold results of classification
-                performance = {
-                    'fp': 0,
-                    'fn': 0,
-                    'tp': 0,
-                    'tn': 0,
-                    'accuracy': 0,
-                    'avg_misclassification': 0,
-                    'misclassification_per_fold': [],
-                    'sensitivity': 0,
-                    'specificity': 0
-                }
-
-                # Variables
-                avg_misclassification = 0
-                fold_misclassification = []
-
+                # Save all constant values used to use as x_axis on the plot
+                constant_values.append(i)
                 # Apply K-fold: splitting the dataset
-                kf = KFold(n_splits=3, shuffle=True)
+                kf = KFold(n_splits=n_subsets, shuffle=True)
 
                 # K-fold Executions
                 for idx_train, idx_test in kf.split(self.data.dataset["data"], self.data.dataset["target"]):
@@ -225,37 +219,36 @@ class Controller:
                     x_test = np.asarray(x_test).astype(np.float64)
                     y_test = [self.data.dataset["target"][idx] for idx in idx_test]
 
-                    # Check the classifier chosen to call the right method
+                    # Classifier verification
                     # K-Nearest Neighbors (KNN)
                     if classifier == 3:
                         prediction = k_nearest_neighbors(x_train, y_train, x_test, y_test, i)
+
                     # Support Vector Machines
                     else:
                         prediction = support_vector_machines(x_train, y_train, x_test, y_test, i)
 
-                    # Results
-                    # Calculates TP, TN, FP, FN and update the dictionary
+                    # Calculate performance
                     performance = performance_measurement(y_test, prediction, data.scenario, performance)
 
-                    # Calculate the average missclassifcation of all folds
-                    avg_misclassification += misclassification(performance)
+                # Calculate averages for each class
+                performance['avg_misclassification'] /= n_subsets
+                performance['sensitivity'] /= n_subsets
+                performance['specificity'] /= n_subsets
 
-                    # Save misclassification per fold to calculate standard deviation
-                    fold_misclassification.append(misclassification(performance))
+                # Save results for plot
+                tests_results.append(np.average(performance['avg_misclassification']))
+                tests_results_std.append(np.std(performance['avg_misclassification_per_fold']))
 
-                # Save average misclassification per run
-                avg_misclassification /= 5
+                # Debug results
+                print("run ", run, " with k=", i)
+                print("average error per class: ", performance['avg_misclassification'])
+                print("all classes error average: ", np.average(performance['avg_misclassification']))
+                print("average all class error per fold :", performance['avg_misclassification_per_fold'])
+                print("error standard deviation per fold", np.std(performance['avg_misclassification_per_fold']))
+                run += 1
 
-                # Print tests results per run
-                # print("Run ", i, " average misclassification: ", avg_misclassification)
-                # print("Run ", i, " folds misclassification standard dev: ", np.std(fold_misclassification))
-                print("run ", i, "finished.")
-
-                # Save results
-                tests_results.append(np.sum(avg_misclassification) / 3)
-                tests_results_std.append(np.std(fold_misclassification))
-
-        return constant, np.multiply(tests_results, 100), np.multiply(tests_results_std, 100)
+        return constant_values, np.multiply(tests_results, 100), np.multiply(tests_results_std, 100)
 
 
 # Run Program
