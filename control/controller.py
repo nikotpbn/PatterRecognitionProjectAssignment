@@ -118,6 +118,20 @@ class Controller:
     def classify(self, n_runs, n_subsets, classifier, constant_value):
         # Run classification as per user input
         for i in range(0, n_runs):
+            # Structure to hold results of classification
+            performance = {
+                'fp': 0,
+                'fn': 0,
+                'tp': 0,
+                'tn': 0,
+                'accuracy': 0,
+                'avg_misclassification': 0,
+                'misclassification_per_fold': [],
+                'avg_misclassification_per_fold': [],
+                'sensitivity': 0,
+                'specificity': 0
+            }
+
             # Apply K-fold: splitting the dataset
             kf = KFold(n_splits=n_subsets, shuffle=True)
 
@@ -242,10 +256,10 @@ class Controller:
 
                 # Debug results
                 print("run ", run, " with k=", i)
-                print("average error per class: ", performance['avg_misclassification'])
-                print("all classes error average: ", np.average(performance['avg_misclassification']))
-                print("average all class error per fold :", performance['avg_misclassification_per_fold'])
-                print("error standard deviation per fold", np.std(performance['avg_misclassification_per_fold']))
+                # print("average error per class: ", performance['avg_misclassification'])
+                # print("all classes error average: ", np.average(performance['avg_misclassification']))
+                # print("average all class error per fold :", performance['avg_misclassification_per_fold'])
+                # print("error standard deviation per fold", np.std(performance['avg_misclassification_per_fold']))
                 run += 1
 
         return constant_values, np.multiply(tests_results, 100), np.multiply(tests_results_std, 100)
