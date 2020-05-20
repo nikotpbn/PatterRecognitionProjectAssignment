@@ -4,7 +4,7 @@ from model.tests import test_dataset, new_sheet
 scenario = 1
 n_runs = 50
 n_subsets = 10
-pca = 0
+pca = 1
 
 # Create a new file
 path, worksheet = new_sheet(scenario)
@@ -17,7 +17,7 @@ worksheet = test_dataset(path=path,
                          n_runs=n_runs,
                          n_subsets=n_subsets,
                          k=3,
-                         c=13,
+                         c=7,
                          pca=pca)
 worksheet.save(path)
 print("finished.")
@@ -29,8 +29,8 @@ worksheet = test_dataset(path=path,
                          scenario=scenario,
                          n_runs=n_runs,
                          n_subsets=n_subsets,
-                         k=3,
-                         c=3,
+                         k=9,
+                         c=9,
                          pca=pca)
 worksheet.save(path)
 print("finished.")
@@ -42,8 +42,8 @@ worksheet = test_dataset(path=path,
                          scenario=scenario,
                          n_runs=n_runs,
                          n_subsets=n_subsets,
-                         k=9,
-                         c=19,
+                         k=7,
+                         c=5,
                          pca=pca)
 worksheet.save(path)
 print("finished.")
@@ -56,7 +56,7 @@ worksheet = test_dataset(path=path,
                          n_runs=n_runs,
                          n_subsets=n_subsets,
                          k=7,
-                         c=11,
+                         c=17,
                          pca=pca)
 worksheet.save(path)
 print("finished.")
