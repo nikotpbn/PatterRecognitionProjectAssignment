@@ -417,4 +417,3 @@ def set_layout(ws, scenario):
         ws['EO1'] = 'specificity_q'
         ws['EP1'] = 'specificity_r'
         ws['EQ1'] = 'specificity_s'
-
