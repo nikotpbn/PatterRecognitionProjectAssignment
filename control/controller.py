@@ -167,7 +167,7 @@ class Controller:
                     prediction = support_vector_machines(x_train, y_train, x_test, y_test, constant_value)
 
                 # Calculate performance
-                performance = performance_measurement(y_test, prediction, data.scenario)
+                performance = performance_measurement(y_test, prediction, data.scenario, performance)
 
             # Calculate average misclassification
             performance['avg_misclassification'] /= n_subsets
