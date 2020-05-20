@@ -16,17 +16,20 @@ def add_label(tab, text):
 
 # Function to get results from performance dict using activity_id
 def get_results(performance, activity_id):
-    misclassification = performance["avg_misclassification"][activity_id].astype(np.str)
-    mean = "Mean of error: \n"
-    mean += "".join(misclassification)
+    misclassification_per_cent = (performance["avg_misclassification"][activity_id] * 100)
+    # misclassification = performance["avg_misclassification"][activity_id].astype(np.str)
+    mean = "Mean of error: %.2f" % misclassification_per_cent
+    mean += "".join("% \n")
 
-    tpr = performance["sensitivity"][activity_id].astype(np.str)
-    sensitivity = "True Positive Ratio (TPR | Sensitivity): \n"
-    sensitivity += "".join(tpr)
+    tpr_per_cent = performance["sensitivity"][activity_id] * 100
+    # tpr = performance["sensitivity"][activity_id].astype(np.str)
+    sensitivity = "True Positive Ratio (TPR | Sensitivity): %.2f" % tpr_per_cent
+    sensitivity += "".join("% \n")
 
-    tnr = performance["specificity"][activity_id].astype(np.str)
-    specificity = "True Negative Ratio (TNR | Specificity): \n"
-    specificity += "".join(tnr)
+    tnr_per_cent = performance["specificity"][activity_id] * 100
+    # tnr = performance["specificity"][activity_id].astype(np.str)
+    specificity = "True Negative Ratio (TNR | Specificity): %.2f" % tnr_per_cent
+    specificity += "".join("% \n")
 
     return mean, sensitivity, specificity
 
@@ -61,30 +64,34 @@ class Result:
         if scenario == 1:
             if classifier == 1:
                 classifier_label = "These are the results found by the\n classifier Minimum Distance Classifier (MDC)"
-                mean_error = "Mean of errors for MDC: " + "{0:.2%}".format(performance["avg_misclassification"])
-                sensitivity = "True positive ratio for MDC: " + "{0:.2}".format(performance["sensitivity"])
-                specificity = "True negative ratio for MDC: " + "{0:.2}".format(performance["specificity"])
+                mean_error = "Mean of errors for MDC: %.2f" % (performance["avg_misclassification"] * 100)
+                sensitivity = "True positive ratio for MDC: %.2f" % (performance["sensitivity"] * 100)
+                specificity = "True negative ratio for MDC: %.2f" % (performance["specificity"] * 100)
             elif classifier == 2:
                 classifier_label = "These are the results found by the\n " \
                                    "classifier Fisher Discriminant Analisys (Fisher LDA)"
-                mean_error = "Mean of errors Fisher LDA: " + "{0:.2%}".format(performance["avg_misclassification"])
-                sensitivity = "True positive ratio Fisher LDA: " + "{0:.2}".format(performance["sensitivity"])
-                specificity = "True negativeratio Fisher LDA: " + "{0:.2}".format(performance["specificity"])
+                mean_error = "Mean of errors Fisher LDA: %.2f" % (performance["avg_misclassification"] * 100)
+                sensitivity = "True positive ratio Fisher LDA: %.2f" % (performance["sensitivity"] * 100)
+                specificity = "True negativeratio Fisher LDA: %.2f" % (performance["specificity"] * 100)
             elif classifier == 3:
                 classifier_label = "These are the results found by the\n classifier K nearest neighbors (KNN)"
-                mean_error = "Mean of errors KNN: " + "{0:.2%}".format(performance["avg_misclassification"])
-                sensitivity = "True positive ratio KNN: " + "{0:.2}".format(performance["sensitivity"])
-                specificity = "True negative ratio KNN: " + "{0:.2}".format(performance["specificity"])
+                mean_error = "Mean of errors KNN: %.2f" % (performance["avg_misclassification"] * 100)
+                sensitivity = "True positive ratio KNN: %.2f" % (performance["sensitivity"] * 100)
+                specificity = "True negative ratio KNN: %.2f" % (performance["specificity"] * 100)
             elif classifier == 4:
                 classifier_label = "These are the results found by the\n classifier Naive-Bayes"
-                mean_error = "Mean of errors Naive-Bayes: " + "{0:.2%}".format(performance["avg_misclassification"])
-                sensitivity = "True positive ratio Naive-Bayes: " + "{0:.2}".format(performance["sensitivity"])
-                specificity = "True negative ratio Naive-Bayes: " + "{0:.2}".format(performance["specificity"])
+                mean_error = "Mean of errors Naive-Bayes: %.2f" % (performance["avg_misclassification"] *100)
+                sensitivity = "True positive ratio Naive-Bayes: %.2f" % (performance["sensitivity"] * 100)
+                specificity = "True negative ratio Naive-Bayes: %.2f" % (performance["specificity"] * 100)
             elif classifier == 5:
                 classifier_label = "These are the results found by the\n classifier Support Vector Machine (SVM)"
-                mean_error = "Mean of errors SVM: " + "{0:.2%}".format(performance["avg_misclassification"])
-                sensitivity = "True positive ratio SVM: " + "{0:.2}".format(performance["sensitivity"])
-                specificity = "True negative ratio SVM: " + "{0:.2}".format(performance["specificity"])
+                mean_error = "Mean of errors SVM: %.2f" % (performance["avg_misclassification"] * 100)
+                sensitivity = "True positive ratio SVM: %.2f" % (performance["sensitivity"] * 100)
+                specificity = "True negative ratio SVM: %.2f" % (performance["specificity"] * 100)
+
+            mean_error += "".join("% \n")
+            sensitivity += "".join("% \n")
+            specificity += "".join("% \n")
 
             # Information Add
             add_label(self.screen_result, classifier_label)
